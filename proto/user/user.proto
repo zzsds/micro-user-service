@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package srv.user;
+import "google/protobuf/timestamp.proto";
+
+service User {
+	rpc Index(Pagination) returns (UserList) {}
+	rpc FindMobile(RegisterRequest) returns (RegisterResponse) {}
+	rpc FindEmail(RegisterRequest) returns (RegisterResponse) {}
+	rpc FindID(RegisterRequest) returns (RegisterResponse) {}
+	rpc CreateMobile(RegisterRequest) returns (RegisterResponse) {}
+	rpc CreateEmail(RegisterRequest) returns (RegisterResponse) {}
+}
+
+enum Enabled {
+	No = 0;
+	Yes = 1;
+}
+
+message Resource {
+  google.protobuf.Timestamp createdAt = 1;
+  google.protobuf.Timestamp updatedAt = 2;
+	int32 id = 3;
+	string name = 4;
+	string nickname = 5;
+	string realname = 6;
+	string mobile = 7;
+	string email = 8;
+	Enabled enabled = 9;
+}
+
+message Pagination {
+	int32 total = 1;
+	int32 page = 2;
+	int32 size = 3;
+}
+
+message UserList {
+	repeated Resource data = 1;
+}
+
+
+message LoginRequest {
+	string say = 1;
+}
+
+message LoginResponse {
+	string say = 1;
+}
+
+message RegisterRequest {
+	string say = 1;
+}
+
+message RegisterResponse {
+	string say = 1;
+}
