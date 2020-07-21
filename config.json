@@ -1,0 +1,21 @@
+{
+  "mysql": {
+    "name": "welfare_user",
+    "user": "root",
+    "password": "password",
+    "host": "192.168.3.2:3306",
+    "debug": true
+  },
+  "jwt": {
+    "publicKey": "3RUFBUT09Ci0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLQ=="
+  },
+  "setting": {
+    "distributional": 3,
+    "task": {
+      "direct": -10,
+      "team": -30,
+      "permit": -1,
+      "audite": -1
+    }   
+   }
+}

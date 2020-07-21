@@ -35,12 +35,12 @@ var _ server.Option
 // Client API for User service
 
 type UserService interface {
-	Index(ctx context.Context, in *Pagination, opts ...client.CallOption) (*UserList, error)
-	FindMobile(ctx context.Context, in *RegisterRequest, opts ...client.CallOption) (*RegisterResponse, error)
-	FindEmail(ctx context.Context, in *RegisterRequest, opts ...client.CallOption) (*RegisterResponse, error)
-	FindID(ctx context.Context, in *RegisterRequest, opts ...client.CallOption) (*RegisterResponse, error)
-	CreateMobile(ctx context.Context, in *RegisterRequest, opts ...client.CallOption) (*RegisterResponse, error)
-	CreateEmail(ctx context.Context, in *RegisterRequest, opts ...client.CallOption) (*RegisterResponse, error)
+	Index(ctx context.Context, in *Pagination, opts ...client.CallOption) (*List, error)
+	Show(ctx context.Context, in *ShowRequest, opts ...client.CallOption) (*ShowResponse, error)
+	GetMobile(ctx context.Context, in *MobileRequest, opts ...client.CallOption) (*MobileResponse, error)
+	MobileCreate(ctx context.Context, in *MobileCreateRequest, opts ...client.CallOption) (*MobileCreateResponse, error)
+	ModifyPassword(ctx context.Context, in *ModifyPassRequest, opts ...client.CallOption) (*ModifyPassResponse, error)
+	ModifyMobile(ctx context.Context, in *ModifyPassRequest, opts ...client.CallOption) (*ModifyPassResponse, error)
 }
 
 type userService struct {
@@ -55,9 +55,9 @@ func NewUserService(name string, c client.Client) UserService {
 	}
 }
 
-func (c *userService) Index(ctx context.Context, in *Pagination, opts ...client.CallOption) (*UserList, error) {
+func (c *userService) Index(ctx context.Context, in *Pagination, opts ...client.CallOption) (*List, error) {
 	req := c.c.NewRequest(c.name, "User.Index", in)
-	out := new(UserList)
+	out := new(List)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -65,9 +65,9 @@ func (c *userService) Index(ctx context.Context, in *Pagination, opts ...client.
 	return out, nil
 }
 
-func (c *userService) FindMobile(ctx context.Context, in *RegisterRequest, opts ...client.CallOption) (*RegisterResponse, error) {
-	req := c.c.NewRequest(c.name, "User.FindMobile", in)
-	out := new(RegisterResponse)
+func (c *userService) Show(ctx context.Context, in *ShowRequest, opts ...client.CallOption) (*ShowResponse, error) {
+	req := c.c.NewRequest(c.name, "User.Show", in)
+	out := new(ShowResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -75,9 +75,9 @@ func (c *userService) FindMobile(ctx context.Context, in *RegisterRequest, opts 
 	return out, nil
 }
 
-func (c *userService) FindEmail(ctx context.Context, in *RegisterRequest, opts ...client.CallOption) (*RegisterResponse, error) {
-	req := c.c.NewRequest(c.name, "User.FindEmail", in)
-	out := new(RegisterResponse)
+func (c *userService) GetMobile(ctx context.Context, in *MobileRequest, opts ...client.CallOption) (*MobileResponse, error) {
+	req := c.c.NewRequest(c.name, "User.GetMobile", in)
+	out := new(MobileResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -85,9 +85,9 @@ func (c *userService) FindEmail(ctx context.Context, in *RegisterRequest, opts .
 	return out, nil
 }
 
-func (c *userService) FindID(ctx context.Context, in *RegisterRequest, opts ...client.CallOption) (*RegisterResponse, error) {
-	req := c.c.NewRequest(c.name, "User.FindID", in)
-	out := new(RegisterResponse)
+func (c *userService) MobileCreate(ctx context.Context, in *MobileCreateRequest, opts ...client.CallOption) (*MobileCreateResponse, error) {
+	req := c.c.NewRequest(c.name, "User.MobileCreate", in)
+	out := new(MobileCreateResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -95,9 +95,9 @@ func (c *userService) FindID(ctx context.Context, in *RegisterRequest, opts ...c
 	return out, nil
 }
 
-func (c *userService) CreateMobile(ctx context.Context, in *RegisterRequest, opts ...client.CallOption) (*RegisterResponse, error) {
-	req := c.c.NewRequest(c.name, "User.CreateMobile", in)
-	out := new(RegisterResponse)
+func (c *userService) ModifyPassword(ctx context.Context, in *ModifyPassRequest, opts ...client.CallOption) (*ModifyPassResponse, error) {
+	req := c.c.NewRequest(c.name, "User.ModifyPassword", in)
+	out := new(ModifyPassResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -105,9 +105,9 @@ func (c *userService) CreateMobile(ctx context.Context, in *RegisterRequest, opt
 	return out, nil
 }
 
-func (c *userService) CreateEmail(ctx context.Context, in *RegisterRequest, opts ...client.CallOption) (*RegisterResponse, error) {
-	req := c.c.NewRequest(c.name, "User.CreateEmail", in)
-	out := new(RegisterResponse)
+func (c *userService) ModifyMobile(ctx context.Context, in *ModifyPassRequest, opts ...client.CallOption) (*ModifyPassResponse, error) {
+	req := c.c.NewRequest(c.name, "User.ModifyMobile", in)
+	out := new(ModifyPassResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -118,22 +118,22 @@ func (c *userService) CreateEmail(ctx context.Context, in *RegisterRequest, opts
 // Server API for User service
 
 type UserHandler interface {
-	Index(context.Context, *Pagination, *UserList) error
-	FindMobile(context.Context, *RegisterRequest, *RegisterResponse) error
-	FindEmail(context.Context, *RegisterRequest, *RegisterResponse) error
-	FindID(context.Context, *RegisterRequest, *RegisterResponse) error
-	CreateMobile(context.Context, *RegisterRequest, *RegisterResponse) error
-	CreateEmail(context.Context, *RegisterRequest, *RegisterResponse) error
+	Index(context.Context, *Pagination, *List) error
+	Show(context.Context, *ShowRequest, *ShowResponse) error
+	GetMobile(context.Context, *MobileRequest, *MobileResponse) error
+	MobileCreate(context.Context, *MobileCreateRequest, *MobileCreateResponse) error
+	ModifyPassword(context.Context, *ModifyPassRequest, *ModifyPassResponse) error
+	ModifyMobile(context.Context, *ModifyPassRequest, *ModifyPassResponse) error
 }
 
 func RegisterUserHandler(s server.Server, hdlr UserHandler, opts ...server.HandlerOption) error {
 	type user interface {
-		Index(ctx context.Context, in *Pagination, out *UserList) error
-		FindMobile(ctx context.Context, in *RegisterRequest, out *RegisterResponse) error
-		FindEmail(ctx context.Context, in *RegisterRequest, out *RegisterResponse) error
-		FindID(ctx context.Context, in *RegisterRequest, out *RegisterResponse) error
-		CreateMobile(ctx context.Context, in *RegisterRequest, out *RegisterResponse) error
-		CreateEmail(ctx context.Context, in *RegisterRequest, out *RegisterResponse) error
+		Index(ctx context.Context, in *Pagination, out *List) error
+		Show(ctx context.Context, in *ShowRequest, out *ShowResponse) error
+		GetMobile(ctx context.Context, in *MobileRequest, out *MobileResponse) error
+		MobileCreate(ctx context.Context, in *MobileCreateRequest, out *MobileCreateResponse) error
+		ModifyPassword(ctx context.Context, in *ModifyPassRequest, out *ModifyPassResponse) error
+		ModifyMobile(ctx context.Context, in *ModifyPassRequest, out *ModifyPassResponse) error
 	}
 	type User struct {
 		user
@@ -146,26 +146,26 @@ type userHandler struct {
 	UserHandler
 }
 
-func (h *userHandler) Index(ctx context.Context, in *Pagination, out *UserList) error {
+func (h *userHandler) Index(ctx context.Context, in *Pagination, out *List) error {
 	return h.UserHandler.Index(ctx, in, out)
 }
 
-func (h *userHandler) FindMobile(ctx context.Context, in *RegisterRequest, out *RegisterResponse) error {
-	return h.UserHandler.FindMobile(ctx, in, out)
+func (h *userHandler) Show(ctx context.Context, in *ShowRequest, out *ShowResponse) error {
+	return h.UserHandler.Show(ctx, in, out)
 }
 
-func (h *userHandler) FindEmail(ctx context.Context, in *RegisterRequest, out *RegisterResponse) error {
-	return h.UserHandler.FindEmail(ctx, in, out)
+func (h *userHandler) GetMobile(ctx context.Context, in *MobileRequest, out *MobileResponse) error {
+	return h.UserHandler.GetMobile(ctx, in, out)
 }
 
-func (h *userHandler) FindID(ctx context.Context, in *RegisterRequest, out *RegisterResponse) error {
-	return h.UserHandler.FindID(ctx, in, out)
+func (h *userHandler) MobileCreate(ctx context.Context, in *MobileCreateRequest, out *MobileCreateResponse) error {
+	return h.UserHandler.MobileCreate(ctx, in, out)
 }
 
-func (h *userHandler) CreateMobile(ctx context.Context, in *RegisterRequest, out *RegisterResponse) error {
-	return h.UserHandler.CreateMobile(ctx, in, out)
+func (h *userHandler) ModifyPassword(ctx context.Context, in *ModifyPassRequest, out *ModifyPassResponse) error {
+	return h.UserHandler.ModifyPassword(ctx, in, out)
 }
 
-func (h *userHandler) CreateEmail(ctx context.Context, in *RegisterRequest, out *RegisterResponse) error {
-	return h.UserHandler.CreateEmail(ctx, in, out)
+func (h *userHandler) ModifyMobile(ctx context.Context, in *ModifyPassRequest, out *ModifyPassResponse) error {
+	return h.UserHandler.ModifyMobile(ctx, in, out)
 }

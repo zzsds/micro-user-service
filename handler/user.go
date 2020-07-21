@@ -3,46 +3,49 @@ package handler
 import (
 	"context"
 
-	log "github.com/micro/go-micro/v2/logger"
-
+	"github.com/micro/go-micro/v2"
 	user "github.com/zzsds/micro-store/user-service/proto/user"
+	"github.com/zzsds/micro-store/user-service/service"
 )
 
-type User struct{}
+// User ...
+type User struct {
+	name string
+}
 
-// Call is a single request handler called via client.Call or the generated client code
-func (e *User) Call(ctx context.Context, req *user.Request, rsp *user.Response) error {
-	log.Info("Received User.Call request")
-	rsp.Msg = "Hello " + req.Name
+// NewUserHandler ...初始化Handler
+func NewUserHandler(srv micro.Service, db *service.Dao) *User {
+	return &User{
+		name: srv.Name(),
+	}
+}
+
+// Index ...
+func (h *User) Index(ctx context.Context, req *user.Pagination, rsp *user.List) error {
 	return nil
 }
 
-// Stream is a server side stream handler called via client.Stream or the generated client code
-func (e *User) Stream(ctx context.Context, req *user.StreamingRequest, stream user.User_StreamStream) error {
-	log.Infof("Received User.Stream request with count: %d", req.Count)
-
-	for i := 0; i < int(req.Count); i++ {
-		log.Infof("Responding: %d", i)
-		if err := stream.Send(&user.StreamingResponse{
-			Count: int64(i),
-		}); err != nil {
-			return err
-		}
-	}
-
+// Show ...
+func (h *User) Show(ctx context.Context, req *user.ShowRequest, rsp *user.ShowResponse) error {
 	return nil
 }
 
-// PingPong is a bidirectional stream handler called via client.Stream or the generated client code
-func (e *User) PingPong(ctx context.Context, stream user.User_PingPongStream) error {
-	for {
-		req, err := stream.Recv()
-		if err != nil {
-			return err
-		}
-		log.Infof("Got ping %v", req.Stroke)
-		if err := stream.Send(&user.Pong{Stroke: req.Stroke}); err != nil {
-			return err
-		}
-	}
+// GetMobile ...
+func (h *User) GetMobile(ctx context.Context, req *user.MobileRequest, rsp *user.MobileResponse) error {
+	return nil
+}
+
+// MobileCreate ...
+func (h *User) MobileCreate(ctx context.Context, req *user.MobileCreateRequest, rsp *user.MobileCreateResponse) error {
+	return nil
+}
+
+// ModifyPassword ...
+func (h *User) ModifyPassword(ctx context.Context, req *user.ModifyPassRequest, rsp *user.ModifyPassResponse) error {
+	return nil
+}
+
+// ModifyMobile ...
+func (h *User) ModifyMobile(ctx context.Context, req *user.ModifyPassRequest, rsp *user.ModifyPassResponse) error {
+	return nil
 }

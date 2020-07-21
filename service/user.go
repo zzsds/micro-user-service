@@ -18,25 +18,25 @@ type User struct {
 }
 
 // NewUser ...
-func NewUser(DB *gorm.DB) *UserInterface {
-	return &user{
+func NewUser(DB *gorm.DB) UserInterface {
+	return &User{
 		db: DB,
 	}
 }
 
 // GetMobile ...
-func GetMobile(mobile string) *models.User {
+func (s *User) GetMobile(mobile string) *models.User {
 
 	return &models.User{}
 }
 
 // GetEmail ...
-func GetEmail(email string) *models.User {
+func (s *User) GetEmail(email string) *models.User {
 
 	return &models.User{}
 }
 
 // Create ...
-func Create(*models.User) error {
+func (s *User) Create(*models.User) error {
 	return nil
 }

@@ -1,0 +1,7 @@
+[db]
+   name = "store_user"
+   user = "root"
+   password = "password"
+   host = "192.168.3.2:3306"
+   charset = "utf8mb4"
+   debug =  true

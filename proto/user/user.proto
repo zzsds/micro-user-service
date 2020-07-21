@@ -1,15 +1,25 @@
 syntax = "proto3";
 
 package srv.user;
+
 import "google/protobuf/timestamp.proto";
 
 service User {
-	rpc Index(Pagination) returns (UserList) {}
-	rpc FindMobile(RegisterRequest) returns (RegisterResponse) {}
-	rpc FindEmail(RegisterRequest) returns (RegisterResponse) {}
-	rpc FindID(RegisterRequest) returns (RegisterResponse) {}
-	rpc CreateMobile(RegisterRequest) returns (RegisterResponse) {}
-	rpc CreateEmail(RegisterRequest) returns (RegisterResponse) {}
+	rpc Index(Pagination) returns (List) {}
+	rpc Show(ShowRequest) returns (ShowResponse) {}
+	rpc GetMobile(MobileRequest) returns (MobileResponse) {}
+	rpc MobileCreate(MobileCreateRequest) returns (MobileCreateResponse) {}
+	rpc ModifyPassword(ModifyPassRequest) returns (ModifyPassResponse) {}
+	rpc ModifyMobile(ModifyPassRequest) returns (ModifyPassResponse) {}
+}
+
+message Pagination {
+	int32 total = 1;
+	int32 page = 2;
+	int32 size = 3;
+	repeated string condition = 4;
+	repeated string order = 5;
+	repeated string group = 6;
 }
 
 enum Enabled {
@@ -26,32 +36,61 @@ message Resource {
 	string realname = 6;
 	string mobile = 7;
 	string email = 8;
-	Enabled enabled = 9;
+	string code = 9;
+	string source = 10;
+	google.protobuf.Timestamp birthday = 11;
+	Enabled enabled = 12;
 }
 
-message Pagination {
-	int32 total = 1;
-	int32 page = 2;
-	int32 size = 3;
-}
-
-message UserList {
+message List {
 	repeated Resource data = 1;
 }
 
-
-message LoginRequest {
-	string say = 1;
+message ShowRequest {
+	int32 id = 1;
 }
 
-message LoginResponse {
-	string say = 1;
+message ShowResponse {
+	Resource data = 1;
 }
 
-message RegisterRequest {
-	string say = 1;
+message MobileRequest {
+	string mobile = 1;
 }
 
-message RegisterResponse {
+message MobileResponse {
+	Resource data = 1;
+}
+
+message MobileCreateRequest {
+	string name = 1;
+	string mobile = 2;
+	string password = 3;
+	string source = 4;
+}
+
+message MobileCreateResponse {
+	int32 id = 1;
+}
+
+message ModifyPassRequest {
+	int32 id = 1;
+	string password = 2;
+}
+
+message ModifyPassResponse {
+	bool success = 1;
+}
+
+message ModifyMobileRequest {
+	int32 id = 1;
+	string password = 2;
+}
+
+message ModifyMobileResponse {
+	bool success = 1;
+}
+
+message Message {
 	string say = 1;
 }
