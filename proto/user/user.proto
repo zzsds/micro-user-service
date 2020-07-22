@@ -8,9 +8,11 @@ service User {
 	rpc Index(Pagination) returns (List) {}
 	rpc Show(ShowRequest) returns (ShowResponse) {}
 	rpc GetMobile(MobileRequest) returns (MobileResponse) {}
-	rpc MobileCreate(MobileCreateRequest) returns (MobileCreateResponse) {}
+	rpc MobileRegister(MobileRegisterRequest) returns (MobileRegisterResponse) {}
 	rpc ModifyPassword(ModifyPassRequest) returns (ModifyPassResponse) {}
+	rpc ResetPassword(ResetPassRequest) returns (ResetPassResponse) {}
 	rpc ModifyMobile(ModifyMobileRequest) returns (ModifyMobileResponse) {}
+	rpc PassLogin(PassLoginRequest) returns (PassLoginResponse) {}
 }
 
 message Pagination {
@@ -62,14 +64,14 @@ message MobileResponse {
 	Resource data = 1;
 }
 
-message MobileCreateRequest {
+message MobileRegisterRequest {
 	string name = 1;
 	string mobile = 2;
 	string password = 3;
 	string source = 4;
 }
 
-message MobileCreateResponse {
+message MobileRegisterResponse {
 	int32 id = 1;
 }
 
@@ -91,6 +93,25 @@ message ModifyMobileRequest {
 
 message ModifyMobileResponse {
 	bool success = 1;
+}
+
+message ResetPassRequest {
+	int32 id = 1;
+	string password = 2;
+}
+
+message ResetPassResponse {
+	bool success = 1;
+}
+
+message PassLoginRequest {
+	string user = 1;
+	string password = 2;
+}
+
+message PassLoginResponse {
+	int32 id = 1;
+	bool success = 2;
 }
 
 message Message {

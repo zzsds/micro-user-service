@@ -15,7 +15,9 @@ type UserInterface interface {
 	Create(*models.User) error
 	FindID(id uint) *models.User
 	ModifyPassword(id uint, password, old string) error
+	ResetPassword(id uint, password string) error
 	ModifyMobile(id uint, mobile, old string) error
+	PassLogin(user, pass string) (*models.User, error)
 }
 
 // User ...
@@ -124,8 +126,44 @@ func (s *User) ModifyPassword(id uint, password, oldPass string) error {
 	return tx.Commit().Error
 }
 
+// ResetPassword 修改密码
+func (s *User) ResetPassword(id uint, password string) error {
+	tx := s.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return err
+	}
+
+	model := s.FindID(id)
+	if model == nil {
+		return fmt.Errorf("User Query Failed")
+	}
+
+	if model.Password == "" {
+		return fmt.Errorf("Password not set")
+	}
+
+	pass, _ := models.EncodeSalt(password, model.Salt)
+	if model.Password == pass {
+		return fmt.Errorf("The old password is the same as the new one")
+	}
+	model.Password = pass
+	if err := tx.Save(&model).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
 // ModifyMobile 修改手机号
-func (s *User) ModifyMobile(id uint, mobile, oldPass string) error {
+func (s *User) ModifyMobile(id uint, mobile, oldMobile string) error {
 	tx := s.db.Begin()
 
 	defer func() {
@@ -147,7 +185,7 @@ func (s *User) ModifyMobile(id uint, mobile, oldPass string) error {
 		return fmt.Errorf("Mobile not set")
 	}
 
-	if model.Mobile != oldPass {
+	if model.Mobile != oldMobile {
 
 		return fmt.Errorf("Old mobile number error")
 	}
@@ -159,4 +197,18 @@ func (s *User) ModifyMobile(id uint, mobile, oldPass string) error {
 	}
 
 	return tx.Commit().Error
+}
+
+// PassLogin ...
+func (s *User) PassLogin(name, password string) (*models.User, error) {
+	model := models.User{}
+	if s.db.Where("name = ?", name).Or("mobile = ?", name).Or("email = ?", name).First(&model).RecordNotFound() {
+		return nil, fmt.Errorf("user does not exist")
+	}
+
+	pass, _ := models.EncodeSalt(password, model.Salt)
+	if model.Password != pass {
+		return nil, fmt.Errorf("The password is wrong")
+	}
+	return &model, nil
 }

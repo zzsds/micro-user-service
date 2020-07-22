@@ -38,9 +38,11 @@ type UserService interface {
 	Index(ctx context.Context, in *Pagination, opts ...client.CallOption) (*List, error)
 	Show(ctx context.Context, in *ShowRequest, opts ...client.CallOption) (*ShowResponse, error)
 	GetMobile(ctx context.Context, in *MobileRequest, opts ...client.CallOption) (*MobileResponse, error)
-	MobileCreate(ctx context.Context, in *MobileCreateRequest, opts ...client.CallOption) (*MobileCreateResponse, error)
+	MobileRegister(ctx context.Context, in *MobileRegisterRequest, opts ...client.CallOption) (*MobileRegisterResponse, error)
 	ModifyPassword(ctx context.Context, in *ModifyPassRequest, opts ...client.CallOption) (*ModifyPassResponse, error)
+	ResetPassword(ctx context.Context, in *ResetPassRequest, opts ...client.CallOption) (*ResetPassResponse, error)
 	ModifyMobile(ctx context.Context, in *ModifyMobileRequest, opts ...client.CallOption) (*ModifyMobileResponse, error)
+	PassLogin(ctx context.Context, in *PassLoginRequest, opts ...client.CallOption) (*PassLoginResponse, error)
 }
 
 type userService struct {
@@ -85,9 +87,9 @@ func (c *userService) GetMobile(ctx context.Context, in *MobileRequest, opts ...
 	return out, nil
 }
 
-func (c *userService) MobileCreate(ctx context.Context, in *MobileCreateRequest, opts ...client.CallOption) (*MobileCreateResponse, error) {
-	req := c.c.NewRequest(c.name, "User.MobileCreate", in)
-	out := new(MobileCreateResponse)
+func (c *userService) MobileRegister(ctx context.Context, in *MobileRegisterRequest, opts ...client.CallOption) (*MobileRegisterResponse, error) {
+	req := c.c.NewRequest(c.name, "User.MobileRegister", in)
+	out := new(MobileRegisterResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -105,9 +107,29 @@ func (c *userService) ModifyPassword(ctx context.Context, in *ModifyPassRequest,
 	return out, nil
 }
 
+func (c *userService) ResetPassword(ctx context.Context, in *ResetPassRequest, opts ...client.CallOption) (*ResetPassResponse, error) {
+	req := c.c.NewRequest(c.name, "User.ResetPassword", in)
+	out := new(ResetPassResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userService) ModifyMobile(ctx context.Context, in *ModifyMobileRequest, opts ...client.CallOption) (*ModifyMobileResponse, error) {
 	req := c.c.NewRequest(c.name, "User.ModifyMobile", in)
 	out := new(ModifyMobileResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) PassLogin(ctx context.Context, in *PassLoginRequest, opts ...client.CallOption) (*PassLoginResponse, error) {
+	req := c.c.NewRequest(c.name, "User.PassLogin", in)
+	out := new(PassLoginResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -121,9 +143,11 @@ type UserHandler interface {
 	Index(context.Context, *Pagination, *List) error
 	Show(context.Context, *ShowRequest, *ShowResponse) error
 	GetMobile(context.Context, *MobileRequest, *MobileResponse) error
-	MobileCreate(context.Context, *MobileCreateRequest, *MobileCreateResponse) error
+	MobileRegister(context.Context, *MobileRegisterRequest, *MobileRegisterResponse) error
 	ModifyPassword(context.Context, *ModifyPassRequest, *ModifyPassResponse) error
+	ResetPassword(context.Context, *ResetPassRequest, *ResetPassResponse) error
 	ModifyMobile(context.Context, *ModifyMobileRequest, *ModifyMobileResponse) error
+	PassLogin(context.Context, *PassLoginRequest, *PassLoginResponse) error
 }
 
 func RegisterUserHandler(s server.Server, hdlr UserHandler, opts ...server.HandlerOption) error {
@@ -131,9 +155,11 @@ func RegisterUserHandler(s server.Server, hdlr UserHandler, opts ...server.Handl
 		Index(ctx context.Context, in *Pagination, out *List) error
 		Show(ctx context.Context, in *ShowRequest, out *ShowResponse) error
 		GetMobile(ctx context.Context, in *MobileRequest, out *MobileResponse) error
-		MobileCreate(ctx context.Context, in *MobileCreateRequest, out *MobileCreateResponse) error
+		MobileRegister(ctx context.Context, in *MobileRegisterRequest, out *MobileRegisterResponse) error
 		ModifyPassword(ctx context.Context, in *ModifyPassRequest, out *ModifyPassResponse) error
+		ResetPassword(ctx context.Context, in *ResetPassRequest, out *ResetPassResponse) error
 		ModifyMobile(ctx context.Context, in *ModifyMobileRequest, out *ModifyMobileResponse) error
+		PassLogin(ctx context.Context, in *PassLoginRequest, out *PassLoginResponse) error
 	}
 	type User struct {
 		user
@@ -158,14 +184,22 @@ func (h *userHandler) GetMobile(ctx context.Context, in *MobileRequest, out *Mob
 	return h.UserHandler.GetMobile(ctx, in, out)
 }
 
-func (h *userHandler) MobileCreate(ctx context.Context, in *MobileCreateRequest, out *MobileCreateResponse) error {
-	return h.UserHandler.MobileCreate(ctx, in, out)
+func (h *userHandler) MobileRegister(ctx context.Context, in *MobileRegisterRequest, out *MobileRegisterResponse) error {
+	return h.UserHandler.MobileRegister(ctx, in, out)
 }
 
 func (h *userHandler) ModifyPassword(ctx context.Context, in *ModifyPassRequest, out *ModifyPassResponse) error {
 	return h.UserHandler.ModifyPassword(ctx, in, out)
 }
 
+func (h *userHandler) ResetPassword(ctx context.Context, in *ResetPassRequest, out *ResetPassResponse) error {
+	return h.UserHandler.ResetPassword(ctx, in, out)
+}
+
 func (h *userHandler) ModifyMobile(ctx context.Context, in *ModifyMobileRequest, out *ModifyMobileResponse) error {
 	return h.UserHandler.ModifyMobile(ctx, in, out)
+}
+
+func (h *userHandler) PassLogin(ctx context.Context, in *PassLoginRequest, out *PassLoginResponse) error {
+	return h.UserHandler.PassLogin(ctx, in, out)
 }

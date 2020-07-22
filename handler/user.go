@@ -75,8 +75,6 @@ func (h *User) Show(ctx context.Context, req *user.ShowRequest, rsp *user.ShowRe
 	if model == nil {
 		return nil
 	}
-	// fmt.Println(model)
-	// return nil
 	createdAt, _ := ptypes.TimestampProto(model.CreatedAt)
 	updatedAt, _ := ptypes.TimestampProto(model.UpdatedAt)
 	rsp.Data = &user.Resource{
@@ -124,8 +122,8 @@ func (h *User) GetMobile(ctx context.Context, req *user.MobileRequest, rsp *user
 	return nil
 }
 
-// MobileCreate ...
-func (h *User) MobileCreate(ctx context.Context, req *user.MobileCreateRequest, rsp *user.MobileCreateResponse) error {
+// MobileRegister ...
+func (h *User) MobileRegister(ctx context.Context, req *user.MobileRegisterRequest, rsp *user.MobileRegisterResponse) error {
 	model := models.User{
 		Mobile:   req.GetMobile(),
 		Password: req.GetPassword(),
@@ -133,21 +131,26 @@ func (h *User) MobileCreate(ctx context.Context, req *user.MobileCreateRequest, 
 		Source:   req.GetSource(),
 	}
 	if model.Source == "" {
-		return errors.BadRequest(h.String("MobileCreate"), "创建来源不能为空")
+		return errors.BadRequest(h.String("MobileRegister"), "创建来源不能为空")
 	}
 	if !models.ValidateMobile(model.Mobile) {
-		return errors.BadRequest(h.String("MobileCreate"), "手机号格式错误")
+		return errors.BadRequest(h.String("MobileRegister"), "手机号格式错误")
 	}
 	if model.Name == "" {
 		model.Name = model.Mobile
 	}
 
 	if h.service.GetMobile(model.Mobile).ID > 0 {
-		return errors.BadRequest(h.String("MobileCreate"), "%s 手机号已存在", model.Mobile)
+		return errors.BadRequest(h.String("MobileRegister"), "%s 手机号已存在", model.Mobile)
 	}
+
+	if len(req.GetPassword()) < passLen {
+		return errors.BadRequest(h.String("MobileRegister"), "密码长度不能小于%d", passLen)
+	}
+
 	err := h.service.Create(&model)
 	if err != nil {
-		return errors.BadRequest(h.String("MobileCreate"), "数据保存失败：%s", err.Error())
+		return errors.BadRequest(h.String("MobileRegister"), "数据保存失败：%s", err.Error())
 	}
 	rsp.Id = int32(model.ID)
 	return nil
@@ -175,6 +178,24 @@ func (h *User) ModifyPassword(ctx context.Context, req *user.ModifyPassRequest, 
 	return nil
 }
 
+// ResetPassword ...
+func (h *User) ResetPassword(ctx context.Context, req *user.ResetPassRequest, rsp *user.ResetPassResponse) error {
+	if req.GetId() <= 0 {
+		return errors.BadRequest(h.String("ModifyPassword"), "UID 不能为空")
+	}
+
+	if len(req.GetPassword()) < passLen {
+		return errors.BadRequest(h.String("ModifyPassword"), "密码长度不能小于%d", passLen)
+	}
+
+	if err := h.service.ResetPassword(uint(req.Id), req.GetPassword()); err != nil {
+		return errors.BadRequest(h.String("ModifyPassword"), "重置失败：%v", err)
+	}
+
+	rsp.Success = true
+	return nil
+}
+
 // ModifyMobile ...
 func (h *User) ModifyMobile(ctx context.Context, req *user.ModifyMobileRequest, rsp *user.ModifyMobileResponse) error {
 	if req.GetId() <= 0 {
@@ -190,5 +211,26 @@ func (h *User) ModifyMobile(ctx context.Context, req *user.ModifyMobileRequest, 
 		return errors.BadRequest(h.String("ModifyMobile"), "修改失败：%v", err)
 	}
 	rsp.Success = true
+	return nil
+}
+
+// PassLogin ...
+func (h *User) PassLogin(ctx context.Context, req *user.PassLoginRequest, rsp *user.PassLoginResponse) error {
+	if req.GetUser() == "" {
+		return errors.BadRequest(h.String("PassLogin"), "账号不能为空")
+	}
+
+	if len(req.GetPassword()) < passLen {
+		return errors.BadRequest(h.String("PassLogin"), "密码长度不能小于%d", passLen)
+	}
+
+	user, err := h.service.PassLogin(req.GetUser(), req.GetPassword())
+	if err != nil {
+		return errors.BadRequest(h.String("PassLogin"), "登录失败：%v", err)
+	}
+
+	rsp.Id = int32(user.ID)
+	rsp.Success = true
+
 	return nil
 }
