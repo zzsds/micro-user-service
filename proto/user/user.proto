@@ -107,6 +107,7 @@ message ResetPassResponse {
 message PassLoginRequest {
 	string user = 1;
 	string password = 2;
+	string source = 3;
 }
 
 message PassLoginResponse {
