@@ -2,14 +2,15 @@ package main
 
 import (
 	"github.com/micro/go-micro/v2"
+	"github.com/micro/go-micro/v2/config/source/file"
 	log "github.com/micro/go-micro/v2/logger"
-	"github.com/zzsds/micro-store/user-service/conf"
-	"github.com/zzsds/micro-store/user-service/handler"
-	"github.com/zzsds/micro-store/user-service/service"
-	"github.com/zzsds/micro-store/user-service/subscriber"
+	"github.com/zzsds/micro-user-service/conf"
+	"github.com/zzsds/micro-user-service/handler"
+	"github.com/zzsds/micro-user-service/service"
+	"github.com/zzsds/micro-user-service/subscriber"
 	"github.com/zzsds/micro-utils/config/nacos"
 
-	user "github.com/zzsds/micro-store/user-service/proto/user"
+	user "github.com/zzsds/micro-user-service/proto/user"
 )
 
 const (
@@ -18,8 +19,7 @@ const (
 )
 
 func main() {
-	conf.InitConfig(nacos.WithDataIDKey(name))
-	log.Fatal(conf.Conf)
+	conf.InitConfig(file.WithPath("config.toml"), nacos.WithDataIDKey(name))
 	// New Service
 	srv := micro.NewService(
 		micro.Name(name),

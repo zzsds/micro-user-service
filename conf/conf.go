@@ -1,7 +1,6 @@
 package conf
 
 import (
-	"flag"
 	"log"
 	"os"
 
@@ -11,7 +10,6 @@ import (
 	"github.com/micro/go-micro/v2/config/encoder/xml"
 	"github.com/micro/go-micro/v2/config/encoder/yaml"
 	"github.com/micro/go-micro/v2/config/source"
-	"github.com/micro/go-micro/v2/config/source/file"
 	"github.com/zzsds/micro-utils/config/nacos"
 )
 
@@ -42,14 +40,7 @@ func InitConfig(ops ...source.Option) *Config {
 		coder  encoder.Encoder
 		source source.Source
 	)
-	flag.StringVar(&ConfigPath, "c", "config.toml", "this default local config.toml")
-	flag.Parse()
-	if isExists(ConfigPath) {
-		source = file.NewSource(file.WithPath(ConfigPath))
-	} else {
-		source = nacos.NewAutoSource(ops...)
-	}
-
+	source = nacos.NewAutoSource(ops...)
 	sc, err := source.Read()
 	if err != nil {
 		log.Fatal(err)

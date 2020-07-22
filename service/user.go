@@ -1,8 +1,10 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/jinzhu/gorm"
-	"github.com/zzsds/micro-store/user-service/models"
+	"github.com/zzsds/micro-user-service/models"
 )
 
 // UserInterface ...
@@ -11,7 +13,9 @@ type UserInterface interface {
 	GetMobile(mobile string) *models.User
 	GetEmail(email string) *models.User
 	Create(*models.User) error
-	FindID(id int32) *models.User
+	FindID(id uint) *models.User
+	ModifyPassword(id uint, password, old string) error
+	ModifyMobile(id uint, mobile, old string) error
 }
 
 // User ...
@@ -27,9 +31,11 @@ func NewUser(DB *gorm.DB) UserInterface {
 }
 
 // FindID ...
-func (s *User) FindID(id int32) *models.User {
+func (s *User) FindID(id uint) *models.User {
 	model := models.User{}
-	s.db.First(&model)
+	if s.db.First(&model, id).RecordNotFound() {
+		return nil
+	}
 	return &model
 }
 
@@ -47,17 +53,110 @@ func (s *User) PageDate(page, size int32, condition, order []string) (list []*mo
 
 // GetMobile ...
 func (s *User) GetMobile(mobile string) *models.User {
-
-	return &models.User{}
+	model := models.User{}
+	s.db.Where("mobile = ?", mobile).First(&model)
+	return &model
 }
 
 // GetEmail ...
 func (s *User) GetEmail(email string) *models.User {
-
-	return &models.User{}
+	model := models.User{}
+	s.db.Where("email = ?", email).First(&model)
+	return &model
 }
 
 // Create ...
-func (s *User) Create(*models.User) error {
-	return nil
+func (s *User) Create(model *models.User) error {
+	tx := s.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return err
+	}
+
+	if err := tx.Create(model).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
+// ModifyPassword 修改密码
+func (s *User) ModifyPassword(id uint, password, oldPass string) error {
+	tx := s.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return err
+	}
+
+	model := s.FindID(id)
+	if model == nil {
+		return fmt.Errorf("User Query Failed")
+	}
+
+	if model.Password == "" {
+		return fmt.Errorf("Password not set")
+	}
+
+	old, _ := models.EncodeSalt(oldPass, model.Salt)
+	if model.Password != old {
+		return fmt.Errorf("Old password validation failed")
+	}
+	pass, _ := models.EncodeSalt(password, model.Salt)
+	model.Password = pass
+	if err := tx.Save(&model).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
+// ModifyMobile 修改手机号
+func (s *User) ModifyMobile(id uint, mobile, oldPass string) error {
+	tx := s.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return err
+	}
+
+	model := s.FindID(id)
+	if model == nil {
+		return fmt.Errorf("User Query Failed")
+	}
+
+	if model.Mobile == "" {
+		return fmt.Errorf("Mobile not set")
+	}
+
+	if model.Mobile != oldPass {
+
+		return fmt.Errorf("Old mobile number error")
+	}
+
+	model.Mobile = mobile
+	if err := tx.Save(&model).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }

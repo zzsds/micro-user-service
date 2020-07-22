@@ -10,7 +10,7 @@ service User {
 	rpc GetMobile(MobileRequest) returns (MobileResponse) {}
 	rpc MobileCreate(MobileCreateRequest) returns (MobileCreateResponse) {}
 	rpc ModifyPassword(ModifyPassRequest) returns (ModifyPassResponse) {}
-	rpc ModifyMobile(ModifyPassRequest) returns (ModifyPassResponse) {}
+	rpc ModifyMobile(ModifyMobileRequest) returns (ModifyMobileResponse) {}
 }
 
 message Pagination {
@@ -75,7 +75,8 @@ message MobileCreateResponse {
 
 message ModifyPassRequest {
 	int32 id = 1;
-	string password = 2;
+	string oldPassword = 2;
+	string password = 3;
 }
 
 message ModifyPassResponse {
@@ -84,7 +85,8 @@ message ModifyPassResponse {
 
 message ModifyMobileRequest {
 	int32 id = 1;
-	string password = 2;
+	string oldMobile = 2;
+	string mobile = 3;
 }
 
 message ModifyMobileResponse {

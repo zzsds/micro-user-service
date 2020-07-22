@@ -40,7 +40,7 @@ type UserService interface {
 	GetMobile(ctx context.Context, in *MobileRequest, opts ...client.CallOption) (*MobileResponse, error)
 	MobileCreate(ctx context.Context, in *MobileCreateRequest, opts ...client.CallOption) (*MobileCreateResponse, error)
 	ModifyPassword(ctx context.Context, in *ModifyPassRequest, opts ...client.CallOption) (*ModifyPassResponse, error)
-	ModifyMobile(ctx context.Context, in *ModifyPassRequest, opts ...client.CallOption) (*ModifyPassResponse, error)
+	ModifyMobile(ctx context.Context, in *ModifyMobileRequest, opts ...client.CallOption) (*ModifyMobileResponse, error)
 }
 
 type userService struct {
@@ -105,9 +105,9 @@ func (c *userService) ModifyPassword(ctx context.Context, in *ModifyPassRequest,
 	return out, nil
 }
 
-func (c *userService) ModifyMobile(ctx context.Context, in *ModifyPassRequest, opts ...client.CallOption) (*ModifyPassResponse, error) {
+func (c *userService) ModifyMobile(ctx context.Context, in *ModifyMobileRequest, opts ...client.CallOption) (*ModifyMobileResponse, error) {
 	req := c.c.NewRequest(c.name, "User.ModifyMobile", in)
-	out := new(ModifyPassResponse)
+	out := new(ModifyMobileResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -123,7 +123,7 @@ type UserHandler interface {
 	GetMobile(context.Context, *MobileRequest, *MobileResponse) error
 	MobileCreate(context.Context, *MobileCreateRequest, *MobileCreateResponse) error
 	ModifyPassword(context.Context, *ModifyPassRequest, *ModifyPassResponse) error
-	ModifyMobile(context.Context, *ModifyPassRequest, *ModifyPassResponse) error
+	ModifyMobile(context.Context, *ModifyMobileRequest, *ModifyMobileResponse) error
 }
 
 func RegisterUserHandler(s server.Server, hdlr UserHandler, opts ...server.HandlerOption) error {
@@ -133,7 +133,7 @@ func RegisterUserHandler(s server.Server, hdlr UserHandler, opts ...server.Handl
 		GetMobile(ctx context.Context, in *MobileRequest, out *MobileResponse) error
 		MobileCreate(ctx context.Context, in *MobileCreateRequest, out *MobileCreateResponse) error
 		ModifyPassword(ctx context.Context, in *ModifyPassRequest, out *ModifyPassResponse) error
-		ModifyMobile(ctx context.Context, in *ModifyPassRequest, out *ModifyPassResponse) error
+		ModifyMobile(ctx context.Context, in *ModifyMobileRequest, out *ModifyMobileResponse) error
 	}
 	type User struct {
 		user
@@ -166,6 +166,6 @@ func (h *userHandler) ModifyPassword(ctx context.Context, in *ModifyPassRequest,
 	return h.UserHandler.ModifyPassword(ctx, in, out)
 }
 
-func (h *userHandler) ModifyMobile(ctx context.Context, in *ModifyPassRequest, out *ModifyPassResponse) error {
+func (h *userHandler) ModifyMobile(ctx context.Context, in *ModifyMobileRequest, out *ModifyMobileResponse) error {
 	return h.UserHandler.ModifyMobile(ctx, in, out)
 }

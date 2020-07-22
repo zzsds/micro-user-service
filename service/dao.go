@@ -7,8 +7,8 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"github.com/zzsds/micro-store/user-service/conf"
-	"github.com/zzsds/micro-store/user-service/models"
+	"github.com/zzsds/micro-user-service/conf"
+	"github.com/zzsds/micro-user-service/models"
 )
 
 type Dao struct {
