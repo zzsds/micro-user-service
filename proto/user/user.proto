@@ -23,7 +23,6 @@ service User {
 }
 
 message SearchPageRequest {
-	int32 total = 1;
 	int32 page = 2;
 	int32 size = 3;
 	message Condition {
@@ -50,7 +49,6 @@ message Order {
 }
 
 message Pagination {
-	int32 total = 1;
 	int32 page = 2;
 	int32 size = 3;
 	repeated string condition = 4;
@@ -80,6 +78,7 @@ message Resource {
 
 message List {
 	repeated Resource data = 1;
+	int32 total = 2;
 }
 
 message ShowRequest {

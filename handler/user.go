@@ -80,8 +80,7 @@ func (h *User) SearchPage(ctx context.Context, req *user.SearchPageRequest, rsp 
 	}
 
 	list, total := h.service.PageDate(req.GetPage(), req.GetSize(), condition, order)
-	req.Total = total
-
+	rsp.Total = total
 	for _, model := range list {
 		rsp.Data = append(rsp.GetData(), h.service.ModelToResource(model))
 	}
@@ -95,7 +94,7 @@ func (h *User) Index(ctx context.Context, req *user.Pagination, rsp *user.List) 
 		req.Size = 20
 	}
 	list, total := h.service.PageDate(req.GetPage(), req.GetSize(), req.GetCondition(), req.GetOrder())
-	req.Total = total
+	rsp.Total = total
 
 	for _, model := range list {
 		rsp.Data = append(rsp.GetData(), h.service.ModelToResource(model))
