@@ -18,15 +18,15 @@ import (
 // User ...
 type User struct {
 	gorm.Model
-	Name     string     `gorm:"not null"`
+	Name     string     `validate:"required" gorm:"not null"`
 	Password string     `json:"-"`
 	Salt     string     `json:"-" gorm:"default:'******';not null"`
-	Mobile   string     `gorm:"type:varchar(50);unique_index;not null"`
+	Mobile   string     `validate:"required" gorm:"type:varchar(50);unique_index;not null"`
 	Email    string     `gorm:"type:varchar(100);not null"`
 	Nickname string     `gorm:"type:varchar(50)"`
 	Realname string     `gorm:"type:varchar(50)"`
 	Code     string     `gorm:"type:varchar(100);unique_index;not null"`
-	Source   string     `gorm:"type:varchar(100);not null"`
+	Source   string     `validate:"required" gorm:"index;type:varchar(100);not null"`
 	Birthday *time.Time `gorm:"type:datetime"`
 	Enabled  int32      `gorm:"type:tinyint(1);default:1"`
 }

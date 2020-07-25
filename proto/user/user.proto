@@ -13,6 +13,40 @@ service User {
 	rpc ResetPassword(ResetPassRequest) returns (ResetPassResponse) {}
 	rpc ModifyMobile(ModifyMobileRequest) returns (ModifyMobileResponse) {}
 	rpc PassLogin(PassLoginRequest) returns (PassLoginResponse) {}
+	rpc FindMobile(FindMobileRequest) returns (MobileResponse) {}
+	rpc FindLikeMobileList(FindLikeMobileRequest) returns (List) {}
+	rpc FindInMobileList(FindInMobileRequest) returns (List) {}
+	rpc FindInIDList(FindInIdRequest) returns (List) {}
+	rpc FindSourceList(FindSourceRequest) returns (List) {}
+	rpc SourceTypeList(SourceTypeRequest) returns (SourceTypeResponse) {}
+	rpc SearchPage(SearchPageRequest) returns (List) {}
+}
+
+message SearchPageRequest {
+	int32 total = 1;
+	int32 page = 2;
+	int32 size = 3;
+	message Condition {
+		string mobile = 1;
+		Between createdAt = 2;
+	}
+	Condition condition = 4;
+	repeated Order order = 5;
+}
+
+message Between {
+	google.protobuf.Timestamp start = 1;
+	google.protobuf.Timestamp end = 2;
+}
+
+enum SortType {
+	ASC = 0;
+	DESC = 2;
+}
+
+message Order {
+	string key = 1;
+	SortType val = 2;
 }
 
 message Pagination {
@@ -30,18 +64,18 @@ enum Enabled {
 }
 
 message Resource {
-  google.protobuf.Timestamp createdAt = 1;
-  google.protobuf.Timestamp updatedAt = 2;
-	int32 id = 3;
-	string name = 4;
-	string nickname = 5;
-	string realname = 6;
-	string mobile = 7;
-	string email = 8;
-	string code = 9;
-	string source = 10;
-	google.protobuf.Timestamp birthday = 11;
-	Enabled enabled = 12;
+	string name = 1;
+	string nickname = 2;
+	string realname = 3;
+	string mobile = 4;
+	string email = 5;
+	string code = 6;
+	string source = 7;
+	google.protobuf.Timestamp birthday = 8;
+	Enabled enabled = 9;
+	int32 id = 10;
+  google.protobuf.Timestamp createdAt = 11;
+  google.protobuf.Timestamp updatedAt = 12;
 }
 
 message List {
@@ -62,17 +96,6 @@ message MobileRequest {
 
 message MobileResponse {
 	Resource data = 1;
-}
-
-message MobileRegisterRequest {
-	string name = 1;
-	string mobile = 2;
-	string password = 3;
-	string source = 4;
-}
-
-message MobileRegisterResponse {
-	int32 id = 1;
 }
 
 message ModifyPassRequest {
@@ -113,6 +136,45 @@ message PassLoginRequest {
 message PassLoginResponse {
 	int32 id = 1;
 	bool success = 2;
+}
+
+message MobileRegisterRequest {
+	string name = 1;
+	string mobile = 2;
+	string password = 3;
+	string source = 4;
+}
+
+message MobileRegisterResponse {
+	int32 id = 1;
+	bool success = 2;
+}
+
+message FindInIdRequest {
+	repeated int32 id = 1;
+}
+
+message FindInMobileRequest {
+	repeated string mobile = 1;
+}
+
+message FindLikeMobileRequest {
+	string mobile = 1;
+}
+
+message FindSourceRequest {
+	string source = 1;
+}
+
+message FindMobileRequest {
+	string mobile = 1;
+}
+
+message SourceTypeRequest {
+}
+
+message SourceTypeResponse {
+	repeated string type = 1;
 }
 
 message Message {

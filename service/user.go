@@ -2,40 +2,94 @@ package service
 
 import (
 	"fmt"
+	"time"
 
-	"github.com/jinzhu/gorm"
+	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/zzsds/micro-user-service/models"
+	user "github.com/zzsds/micro-user-service/proto/user"
 )
 
 // UserInterface ...
 type UserInterface interface {
+	ResourceToModel(req *user.Resource) *models.User
+	ModelToResource(model *models.User) *user.Resource
 	PageDate(page, size int32, condition, order []string) ([]*models.User, int32)
-	GetMobile(mobile string) *models.User
-	GetEmail(email string) *models.User
+	FindMobile(mobile string) *models.User
+	FindEmail(email string) *models.User
 	Create(*models.User) error
 	FindID(id uint) *models.User
 	ModifyPassword(id uint, password, old string) error
 	ResetPassword(id uint, password string) error
 	ModifyMobile(id uint, mobile, old string) error
 	PassLogin(user, pass string) (*models.User, error)
+	FindLikeMobile(mobile string) []*models.User
+	FindInMobile(mobile ...string) []*models.User
+	FindInID(id ...uint) []*models.User
+	FindSource(source string) []*models.User
+	SourceType() []string
 }
 
 // User ...
 type User struct {
-	db *gorm.DB
+	*Dao
 }
 
 // NewUser ...
-func NewUser(DB *gorm.DB) UserInterface {
+func NewUser(dao *Dao) UserInterface {
 	return &User{
-		db: DB,
+		dao,
+	}
+}
+
+// ModelToResource ...
+func (s *User) ModelToResource(model *models.User) *user.Resource {
+	createdAt, _ := ptypes.TimestampProto(model.CreatedAt)
+	updatedAt, _ := ptypes.TimestampProto(model.UpdatedAt)
+	var birthday *timestamp.Timestamp
+	if model.Birthday != nil {
+		birthday, _ = ptypes.TimestampProto(*model.Birthday)
+	}
+	return &user.Resource{
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
+		Id:        int32(model.ID),
+		Name:      model.Name,
+		Mobile:    model.Mobile,
+		Code:      model.Code,
+		Source:    model.Source,
+		Nickname:  model.Nickname,
+		Realname:  model.Realname,
+		Email:     model.Email,
+		Birthday:  birthday,
+		Enabled:   user.Enabled(model.Enabled),
+	}
+}
+
+// ResourceToModel ...
+func (s *User) ResourceToModel(req *user.Resource) *models.User {
+	var birthday *time.Time
+	if req.GetBirthday() != nil {
+		birth, _ := ptypes.Timestamp(req.GetBirthday())
+		birthday = &birth
+	}
+	return &models.User{
+		Mobile:   req.GetMobile(),
+		Name:     req.GetName(),
+		Source:   req.GetSource(),
+		Email:    req.GetEmail(),
+		Nickname: req.GetNickname(),
+		Realname: req.GetRealname(),
+		Code:     req.GetCode(),
+		Birthday: birthday,
+		Enabled:  int32(req.GetEnabled()),
 	}
 }
 
 // FindID ...
 func (s *User) FindID(id uint) *models.User {
 	model := models.User{}
-	if s.db.First(&model, id).RecordNotFound() {
+	if s.Db().First(&model, id).RecordNotFound() {
 		return nil
 	}
 	return &model
@@ -43,33 +97,34 @@ func (s *User) FindID(id uint) *models.User {
 
 // PageDate 分页查询
 func (s *User) PageDate(page, size int32, condition, order []string) (list []*models.User, total int32) {
+	db := s.Db()
 	for _, o := range order {
-		s.db = s.db.Order(o)
+		db = db.Order(o)
 	}
 	for _, c := range condition {
-		s.db = s.db.Where(c)
+		db = db.Where(c)
 	}
-	s.db.Model(models.User{}).Count(&total).Offset(page * size).Limit(size).Find(&list)
+	db.Model(models.User{}).Count(&total).Offset(page * size).Limit(size).Find(&list)
 	return list, total
 }
 
-// GetMobile ...
-func (s *User) GetMobile(mobile string) *models.User {
+// FindMobile ...
+func (s *User) FindMobile(mobile string) *models.User {
 	model := models.User{}
-	s.db.Where("mobile = ?", mobile).First(&model)
+	s.Db().Where("mobile = ?", mobile).First(&model)
 	return &model
 }
 
-// GetEmail ...
-func (s *User) GetEmail(email string) *models.User {
+// FindEmail ...
+func (s *User) FindEmail(email string) *models.User {
 	model := models.User{}
-	s.db.Where("email = ?", email).First(&model)
+	s.Db().Where("email = ?", email).First(&model)
 	return &model
 }
 
 // Create ...
 func (s *User) Create(model *models.User) error {
-	tx := s.db.Begin()
+	tx := s.Db().Begin()
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -91,7 +146,7 @@ func (s *User) Create(model *models.User) error {
 
 // ModifyPassword 修改密码
 func (s *User) ModifyPassword(id uint, password, oldPass string) error {
-	tx := s.db.Begin()
+	tx := s.Db().Begin()
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -128,7 +183,7 @@ func (s *User) ModifyPassword(id uint, password, oldPass string) error {
 
 // ResetPassword 修改密码
 func (s *User) ResetPassword(id uint, password string) error {
-	tx := s.db.Begin()
+	tx := s.Db().Begin()
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -164,7 +219,7 @@ func (s *User) ResetPassword(id uint, password string) error {
 
 // ModifyMobile 修改手机号
 func (s *User) ModifyMobile(id uint, mobile, oldMobile string) error {
-	tx := s.db.Begin()
+	tx := s.Db().Begin()
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -202,7 +257,7 @@ func (s *User) ModifyMobile(id uint, mobile, oldMobile string) error {
 // PassLogin ...
 func (s *User) PassLogin(name, password string) (*models.User, error) {
 	model := models.User{}
-	if s.db.Where("name = ?", name).Or("mobile = ?", name).Or("email = ?", name).First(&model).RecordNotFound() {
+	if s.Db().Where("name = ?", name).Or("mobile = ?", name).Or("email = ?", name).First(&model).RecordNotFound() {
 		return nil, fmt.Errorf("user does not exist")
 	}
 
@@ -211,4 +266,49 @@ func (s *User) PassLogin(name, password string) (*models.User, error) {
 		return nil, fmt.Errorf("The password is wrong")
 	}
 	return &model, nil
+}
+
+// FindLikeMobile ...模糊查询手机号
+func (s *User) FindLikeMobile(mobile string) []*models.User {
+	list := make([]*models.User, 0)
+	if s.Db().Where("mobile LIKE ?", "%"+fmt.Sprintf("%s", mobile)+"%").Find(&list).RecordNotFound() {
+		return nil
+	}
+	return list
+}
+
+// FindInMobile ...批量查询手机号
+func (s *User) FindInMobile(mobile ...string) []*models.User {
+	list := make([]*models.User, 0)
+	if s.Db().Where("mobile in (?)", mobile).Find(&list).RecordNotFound() {
+		return nil
+	}
+	return list
+}
+
+// FindInID ...批量查询ID
+func (s *User) FindInID(id ...uint) []*models.User {
+	list := make([]*models.User, 0)
+	if s.Db().Where("id in (?)", id).Find(&list).RecordNotFound() {
+		return nil
+	}
+	return list
+}
+
+// FindSource ...查询注册来源
+func (s *User) FindSource(source string) []*models.User {
+	list := make([]*models.User, 0)
+	if s.Db().Where("source = ?", source).Find(&list).RecordNotFound() {
+		return nil
+	}
+	return list
+}
+
+// SourceType ...
+func (s *User) SourceType() []string {
+	model, list := models.User{}, make([]string, 0)
+	if s.Db().Model(model).Select("source").Group("source").Pluck("source", &list).RecordNotFound() {
+		return nil
+	}
+	return list
 }

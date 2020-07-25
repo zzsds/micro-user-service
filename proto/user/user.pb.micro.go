@@ -43,6 +43,13 @@ type UserService interface {
 	ResetPassword(ctx context.Context, in *ResetPassRequest, opts ...client.CallOption) (*ResetPassResponse, error)
 	ModifyMobile(ctx context.Context, in *ModifyMobileRequest, opts ...client.CallOption) (*ModifyMobileResponse, error)
 	PassLogin(ctx context.Context, in *PassLoginRequest, opts ...client.CallOption) (*PassLoginResponse, error)
+	FindMobile(ctx context.Context, in *FindMobileRequest, opts ...client.CallOption) (*MobileResponse, error)
+	FindLikeMobileList(ctx context.Context, in *FindLikeMobileRequest, opts ...client.CallOption) (*List, error)
+	FindInMobileList(ctx context.Context, in *FindInMobileRequest, opts ...client.CallOption) (*List, error)
+	FindInIDList(ctx context.Context, in *FindInIdRequest, opts ...client.CallOption) (*List, error)
+	FindSourceList(ctx context.Context, in *FindSourceRequest, opts ...client.CallOption) (*List, error)
+	SourceTypeList(ctx context.Context, in *SourceTypeRequest, opts ...client.CallOption) (*SourceTypeResponse, error)
+	SearchPage(ctx context.Context, in *SearchPageRequest, opts ...client.CallOption) (*List, error)
 }
 
 type userService struct {
@@ -137,6 +144,76 @@ func (c *userService) PassLogin(ctx context.Context, in *PassLoginRequest, opts 
 	return out, nil
 }
 
+func (c *userService) FindMobile(ctx context.Context, in *FindMobileRequest, opts ...client.CallOption) (*MobileResponse, error) {
+	req := c.c.NewRequest(c.name, "User.FindMobile", in)
+	out := new(MobileResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) FindLikeMobileList(ctx context.Context, in *FindLikeMobileRequest, opts ...client.CallOption) (*List, error) {
+	req := c.c.NewRequest(c.name, "User.FindLikeMobileList", in)
+	out := new(List)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) FindInMobileList(ctx context.Context, in *FindInMobileRequest, opts ...client.CallOption) (*List, error) {
+	req := c.c.NewRequest(c.name, "User.FindInMobileList", in)
+	out := new(List)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) FindInIDList(ctx context.Context, in *FindInIdRequest, opts ...client.CallOption) (*List, error) {
+	req := c.c.NewRequest(c.name, "User.FindInIDList", in)
+	out := new(List)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) FindSourceList(ctx context.Context, in *FindSourceRequest, opts ...client.CallOption) (*List, error) {
+	req := c.c.NewRequest(c.name, "User.FindSourceList", in)
+	out := new(List)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) SourceTypeList(ctx context.Context, in *SourceTypeRequest, opts ...client.CallOption) (*SourceTypeResponse, error) {
+	req := c.c.NewRequest(c.name, "User.SourceTypeList", in)
+	out := new(SourceTypeResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) SearchPage(ctx context.Context, in *SearchPageRequest, opts ...client.CallOption) (*List, error) {
+	req := c.c.NewRequest(c.name, "User.SearchPage", in)
+	out := new(List)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for User service
 
 type UserHandler interface {
@@ -148,6 +225,13 @@ type UserHandler interface {
 	ResetPassword(context.Context, *ResetPassRequest, *ResetPassResponse) error
 	ModifyMobile(context.Context, *ModifyMobileRequest, *ModifyMobileResponse) error
 	PassLogin(context.Context, *PassLoginRequest, *PassLoginResponse) error
+	FindMobile(context.Context, *FindMobileRequest, *MobileResponse) error
+	FindLikeMobileList(context.Context, *FindLikeMobileRequest, *List) error
+	FindInMobileList(context.Context, *FindInMobileRequest, *List) error
+	FindInIDList(context.Context, *FindInIdRequest, *List) error
+	FindSourceList(context.Context, *FindSourceRequest, *List) error
+	SourceTypeList(context.Context, *SourceTypeRequest, *SourceTypeResponse) error
+	SearchPage(context.Context, *SearchPageRequest, *List) error
 }
 
 func RegisterUserHandler(s server.Server, hdlr UserHandler, opts ...server.HandlerOption) error {
@@ -160,6 +244,13 @@ func RegisterUserHandler(s server.Server, hdlr UserHandler, opts ...server.Handl
 		ResetPassword(ctx context.Context, in *ResetPassRequest, out *ResetPassResponse) error
 		ModifyMobile(ctx context.Context, in *ModifyMobileRequest, out *ModifyMobileResponse) error
 		PassLogin(ctx context.Context, in *PassLoginRequest, out *PassLoginResponse) error
+		FindMobile(ctx context.Context, in *FindMobileRequest, out *MobileResponse) error
+		FindLikeMobileList(ctx context.Context, in *FindLikeMobileRequest, out *List) error
+		FindInMobileList(ctx context.Context, in *FindInMobileRequest, out *List) error
+		FindInIDList(ctx context.Context, in *FindInIdRequest, out *List) error
+		FindSourceList(ctx context.Context, in *FindSourceRequest, out *List) error
+		SourceTypeList(ctx context.Context, in *SourceTypeRequest, out *SourceTypeResponse) error
+		SearchPage(ctx context.Context, in *SearchPageRequest, out *List) error
 	}
 	type User struct {
 		user
@@ -202,4 +293,32 @@ func (h *userHandler) ModifyMobile(ctx context.Context, in *ModifyMobileRequest,
 
 func (h *userHandler) PassLogin(ctx context.Context, in *PassLoginRequest, out *PassLoginResponse) error {
 	return h.UserHandler.PassLogin(ctx, in, out)
+}
+
+func (h *userHandler) FindMobile(ctx context.Context, in *FindMobileRequest, out *MobileResponse) error {
+	return h.UserHandler.FindMobile(ctx, in, out)
+}
+
+func (h *userHandler) FindLikeMobileList(ctx context.Context, in *FindLikeMobileRequest, out *List) error {
+	return h.UserHandler.FindLikeMobileList(ctx, in, out)
+}
+
+func (h *userHandler) FindInMobileList(ctx context.Context, in *FindInMobileRequest, out *List) error {
+	return h.UserHandler.FindInMobileList(ctx, in, out)
+}
+
+func (h *userHandler) FindInIDList(ctx context.Context, in *FindInIdRequest, out *List) error {
+	return h.UserHandler.FindInIDList(ctx, in, out)
+}
+
+func (h *userHandler) FindSourceList(ctx context.Context, in *FindSourceRequest, out *List) error {
+	return h.UserHandler.FindSourceList(ctx, in, out)
+}
+
+func (h *userHandler) SourceTypeList(ctx context.Context, in *SourceTypeRequest, out *SourceTypeResponse) error {
+	return h.UserHandler.SourceTypeList(ctx, in, out)
+}
+
+func (h *userHandler) SearchPage(ctx context.Context, in *SearchPageRequest, out *List) error {
+	return h.UserHandler.SearchPage(ctx, in, out)
 }
