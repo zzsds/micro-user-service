@@ -68,10 +68,12 @@ func (h *User) SearchPage(ctx context.Context, req *user.SearchPageRequest, rsp 
 		if cd.GetMobile() != "" {
 			condition = append(condition, fmt.Sprintf("mobile LIKE '%s'", "%"+cd.Mobile+"%"))
 		}
+
 		if create := cd.GetCreatedAt(); create != nil {
-			start := ptypes.TimestampString(create.GetStart())
-			end := ptypes.TimestampString(create.GetStart())
-			condition = append(condition, fmt.Sprintf("created_at BETWEEN '%s' AND '%s'", start, end))
+			if create.GetStart() == nil || create.GetEnd() == nil {
+				return errors.BadRequest(h.String("SearchPage"), "时间区间错误")
+			}
+			condition = append(condition, fmt.Sprintf("created_at BETWEEN '%s' AND '%s'", ptypes.TimestampString(create.GetStart()), ptypes.TimestampString(create.GetEnd())))
 		}
 	}
 	order := make([]string, len(req.GetOrder()))
