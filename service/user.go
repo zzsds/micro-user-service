@@ -271,7 +271,11 @@ func (s *User) PassLogin(name, password string) (*models.User, error) {
 // FindLikeMobile ...模糊查询手机号
 func (s *User) FindLikeMobile(mobile string) []*models.User {
 	list := make([]*models.User, 0)
-	if s.Db().Where("mobile LIKE ?", "%"+fmt.Sprintf("%s", mobile)+"%").Find(&list).RecordNotFound() {
+	db := s.Db()
+	if mobile != "" {
+		db = db.Where("mobile LIKE ?", "%"+fmt.Sprintf("%s", mobile)+"%")
+	}
+	if db.Find(&list).RecordNotFound() {
 		return nil
 	}
 	return list
@@ -280,7 +284,12 @@ func (s *User) FindLikeMobile(mobile string) []*models.User {
 // FindInMobile ...批量查询手机号
 func (s *User) FindInMobile(mobile ...string) []*models.User {
 	list := make([]*models.User, 0)
-	if s.Db().Where("mobile in (?)", mobile).Find(&list).RecordNotFound() {
+	db := s.Db()
+	if len(mobile) > 0 {
+		db = db.Where("mobile in (?)", mobile)
+	}
+
+	if db.Find(&list).RecordNotFound() {
 		return nil
 	}
 	return list
@@ -289,7 +298,11 @@ func (s *User) FindInMobile(mobile ...string) []*models.User {
 // FindInID ...批量查询ID
 func (s *User) FindInID(id ...uint) []*models.User {
 	list := make([]*models.User, 0)
-	if s.Db().Where("id in (?)", id).Find(&list).RecordNotFound() {
+	db := s.Db()
+	if len(id) > 0 {
+		db = db.Where("id in (?)", id)
+	}
+	if db.Find(&list).RecordNotFound() {
 		return nil
 	}
 	return list
@@ -298,7 +311,11 @@ func (s *User) FindInID(id ...uint) []*models.User {
 // FindSource ...查询注册来源
 func (s *User) FindSource(source string) []*models.User {
 	list := make([]*models.User, 0)
-	if s.Db().Where("source = ?", source).Find(&list).RecordNotFound() {
+	db := s.Db()
+	if source != "" {
+		db = db.Where("source = ?", source)
+	}
+	if db.Find(&list).RecordNotFound() {
 		return nil
 	}
 	return list
