@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	name    = "store.user"
+	name    = "store.srv.user"
 	version = "latest"
 )
 
