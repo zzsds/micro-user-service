@@ -23,14 +23,14 @@ service User {
 }
 
 message SearchPageRequest {
-	int32 page = 2;
-	int32 size = 3;
+	int32 page = 1;
+	int32 size = 2;
 	message Condition {
 		string mobile = 1;
 		Between createdAt = 2;
 	}
-	Condition condition = 4;
-	repeated Order order = 5;
+	Condition condition = 3;
+	repeated Order order = 4;
 }
 
 message Between {
@@ -49,11 +49,11 @@ message Order {
 }
 
 message Pagination {
-	int32 page = 2;
-	int32 size = 3;
-	repeated string condition = 4;
-	repeated string order = 5;
-	repeated string group = 6;
+	int32 page = 1;
+	int32 size = 2;
+	repeated string condition = 3;
+	repeated string order = 4;
+	repeated string group = 5;
 }
 
 enum Enabled {
