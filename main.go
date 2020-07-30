@@ -6,7 +6,7 @@ import (
 	log "github.com/micro/go-micro/v2/logger"
 	"github.com/zzsds/micro-user-service/conf"
 	"github.com/zzsds/micro-user-service/handler"
-	"github.com/zzsds/micro-user-service/service"
+	dao "github.com/zzsds/micro-user-service/service"
 	"github.com/zzsds/micro-user-service/subscriber"
 	"github.com/zzsds/micro-utils/config/nacos"
 
@@ -21,24 +21,24 @@ const (
 func main() {
 	conf.InitConfig(file.WithPath("config.toml"), nacos.WithDataIDKey(name))
 	// New Service
-	srv := micro.NewService(
+	service := micro.NewService(
 		micro.Name(name),
 		micro.Version(version),
 	)
 
 	// Initialise service
-	srv.Init()
-	dao := service.NewDao()
+	service.Init()
+	dao := dao.NewDao()
 	defer dao.Close()
 
 	// Register Handler
-	user.RegisterUserHandler(srv.Server(), handler.NewUserHandler(srv, dao))
+	user.RegisterUserHandler(service.Server(), handler.NewUserHandler(service, dao))
 
 	// Register Struct as Subscriber
-	micro.RegisterSubscriber(name, srv.Server(), new(subscriber.User))
+	micro.RegisterSubscriber(name, service.Server(), new(subscriber.User))
 
 	// Run service
-	if err := srv.Run(); err != nil {
+	if err := service.Run(); err != nil {
 		log.Fatal(err)
 	}
 }
