@@ -13,7 +13,8 @@ service User {
 	rpc ResetPassword(ResetPassRequest) returns (ResetPassResponse) {}
 	rpc ModifyMobile(ModifyMobileRequest) returns (ModifyMobileResponse) {}
 	rpc PassLogin(PassLoginRequest) returns (PassLoginResponse) {}
-	rpc FindMobile(FindMobileRequest) returns (MobileResponse) {}
+	rpc FindMobile(FindMobileRequest) returns (FindMobileResponse) {}
+	rpc FindCode(FindCodeRequest) returns (FindCodeResponse) {}
 	rpc FindLikeMobileList(FindLikeMobileRequest) returns (List) {}
 	rpc FindInMobileList(FindInMobileRequest) returns (List) {}
 	rpc FindInIDList(FindInIdRequest) returns (List) {}
@@ -169,11 +170,23 @@ message FindMobileRequest {
 	string mobile = 1;
 }
 
+message FindMobileResponse {
+	Resource data = 1;
+}
+
 message SourceTypeRequest {
 }
 
 message SourceTypeResponse {
 	repeated string type = 1;
+}
+
+message FindCodeRequest {
+	string code = 1;
+}
+
+message FindCodeResponse {
+	Resource data = 1;
 }
 
 message Message {

@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/go-playground/locales/zh"
@@ -25,13 +26,14 @@ type UserHandler interface {
 	ResetPassword(context.Context, *user.ResetPassRequest, *user.ResetPassResponse) error
 	ModifyMobile(context.Context, *user.ModifyMobileRequest, *user.ModifyMobileResponse) error
 	PassLogin(context.Context, *user.PassLoginRequest, *user.PassLoginResponse) error
-	FindMobile(context.Context, *user.FindMobileRequest, *user.MobileResponse) error
+	FindMobile(context.Context, *user.FindMobileRequest, *user.FindMobileResponse) error
+	FindCode(context.Context, *user.FindCodeRequest, *user.FindCodeResponse) error
 	FindLikeMobileList(context.Context, *user.FindLikeMobileRequest, *user.List) error
 	FindInMobileList(context.Context, *user.FindInMobileRequest, *user.List) error
 	FindInIDList(context.Context, *user.FindInIdRequest, *user.List) error
 	FindSourceList(context.Context, *user.FindSourceRequest, *user.List) error
 	SourceTypeList(context.Context, *user.SourceTypeRequest, *user.SourceTypeResponse) error
-	SearchPage(ctx context.Context, in *user.SearchPageRequest, out *user.List) error
+	SearchPage(context.Context, *user.SearchPageRequest, *user.List) error
 }
 
 const (
@@ -259,11 +261,25 @@ func (h *User) PassLogin(ctx context.Context, req *user.PassLoginRequest, rsp *u
 }
 
 // FindMobile ...
-func (h *User) FindMobile(ctx context.Context, req *user.FindMobileRequest, rsp *user.MobileResponse) error {
+func (h *User) FindMobile(ctx context.Context, req *user.FindMobileRequest, rsp *user.FindMobileResponse) error {
 	if !models.ValidateMobile(req.GetMobile()) {
 		return errors.BadRequest(h.String("GetMobile"), "%s 手机号格式错误", req.GetMobile())
 	}
 	model := h.service.FindMobile(req.GetMobile())
+	if model == nil {
+		return nil
+	}
+
+	rsp.Data = h.service.ModelToResource(model)
+	return nil
+}
+
+// FindCode ...
+func (h *User) FindCode(ctx context.Context, req *user.FindCodeRequest, rsp *user.FindCodeResponse) error {
+	if ok, _ := regexp.MatchString(`([0-9]\d{5})$`, req.GetCode()); !ok {
+		return errors.BadRequest(h.String("GetCode"), "%s code 格式错误", req.GetCode())
+	}
+	model := h.service.FindCode(req.GetCode())
 	if model == nil {
 		return nil
 	}

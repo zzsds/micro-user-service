@@ -16,6 +16,7 @@ type UserInterface interface {
 	ModelToResource(model *models.User) *user.Resource
 	PageDate(page, size int32, condition, order []string) ([]*models.User, int32)
 	FindMobile(mobile string) *models.User
+	FindCode(code string) *models.User
 	FindEmail(email string) *models.User
 	Create(*models.User) error
 	FindID(id uint) *models.User
@@ -112,6 +113,13 @@ func (s *User) PageDate(page, size int32, condition, order []string) (list []*mo
 func (s *User) FindMobile(mobile string) *models.User {
 	model := models.User{}
 	s.Db().Where("mobile = ?", mobile).First(&model)
+	return &model
+}
+
+// FindCode ...
+func (s *User) FindCode(code string) *models.User {
+	model := models.User{}
+	s.Db().Where("code = ?", code).First(&model)
 	return &model
 }
 

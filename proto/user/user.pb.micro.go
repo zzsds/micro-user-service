@@ -43,7 +43,8 @@ type UserService interface {
 	ResetPassword(ctx context.Context, in *ResetPassRequest, opts ...client.CallOption) (*ResetPassResponse, error)
 	ModifyMobile(ctx context.Context, in *ModifyMobileRequest, opts ...client.CallOption) (*ModifyMobileResponse, error)
 	PassLogin(ctx context.Context, in *PassLoginRequest, opts ...client.CallOption) (*PassLoginResponse, error)
-	FindMobile(ctx context.Context, in *FindMobileRequest, opts ...client.CallOption) (*MobileResponse, error)
+	FindMobile(ctx context.Context, in *FindMobileRequest, opts ...client.CallOption) (*FindMobileResponse, error)
+	FindCode(ctx context.Context, in *FindCodeRequest, opts ...client.CallOption) (*FindCodeResponse, error)
 	FindLikeMobileList(ctx context.Context, in *FindLikeMobileRequest, opts ...client.CallOption) (*List, error)
 	FindInMobileList(ctx context.Context, in *FindInMobileRequest, opts ...client.CallOption) (*List, error)
 	FindInIDList(ctx context.Context, in *FindInIdRequest, opts ...client.CallOption) (*List, error)
@@ -144,9 +145,19 @@ func (c *userService) PassLogin(ctx context.Context, in *PassLoginRequest, opts 
 	return out, nil
 }
 
-func (c *userService) FindMobile(ctx context.Context, in *FindMobileRequest, opts ...client.CallOption) (*MobileResponse, error) {
+func (c *userService) FindMobile(ctx context.Context, in *FindMobileRequest, opts ...client.CallOption) (*FindMobileResponse, error) {
 	req := c.c.NewRequest(c.name, "User.FindMobile", in)
-	out := new(MobileResponse)
+	out := new(FindMobileResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) FindCode(ctx context.Context, in *FindCodeRequest, opts ...client.CallOption) (*FindCodeResponse, error) {
+	req := c.c.NewRequest(c.name, "User.FindCode", in)
+	out := new(FindCodeResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -225,7 +236,8 @@ type UserHandler interface {
 	ResetPassword(context.Context, *ResetPassRequest, *ResetPassResponse) error
 	ModifyMobile(context.Context, *ModifyMobileRequest, *ModifyMobileResponse) error
 	PassLogin(context.Context, *PassLoginRequest, *PassLoginResponse) error
-	FindMobile(context.Context, *FindMobileRequest, *MobileResponse) error
+	FindMobile(context.Context, *FindMobileRequest, *FindMobileResponse) error
+	FindCode(context.Context, *FindCodeRequest, *FindCodeResponse) error
 	FindLikeMobileList(context.Context, *FindLikeMobileRequest, *List) error
 	FindInMobileList(context.Context, *FindInMobileRequest, *List) error
 	FindInIDList(context.Context, *FindInIdRequest, *List) error
@@ -244,7 +256,8 @@ func RegisterUserHandler(s server.Server, hdlr UserHandler, opts ...server.Handl
 		ResetPassword(ctx context.Context, in *ResetPassRequest, out *ResetPassResponse) error
 		ModifyMobile(ctx context.Context, in *ModifyMobileRequest, out *ModifyMobileResponse) error
 		PassLogin(ctx context.Context, in *PassLoginRequest, out *PassLoginResponse) error
-		FindMobile(ctx context.Context, in *FindMobileRequest, out *MobileResponse) error
+		FindMobile(ctx context.Context, in *FindMobileRequest, out *FindMobileResponse) error
+		FindCode(ctx context.Context, in *FindCodeRequest, out *FindCodeResponse) error
 		FindLikeMobileList(ctx context.Context, in *FindLikeMobileRequest, out *List) error
 		FindInMobileList(ctx context.Context, in *FindInMobileRequest, out *List) error
 		FindInIDList(ctx context.Context, in *FindInIdRequest, out *List) error
@@ -295,8 +308,12 @@ func (h *userHandler) PassLogin(ctx context.Context, in *PassLoginRequest, out *
 	return h.UserHandler.PassLogin(ctx, in, out)
 }
 
-func (h *userHandler) FindMobile(ctx context.Context, in *FindMobileRequest, out *MobileResponse) error {
+func (h *userHandler) FindMobile(ctx context.Context, in *FindMobileRequest, out *FindMobileResponse) error {
 	return h.UserHandler.FindMobile(ctx, in, out)
+}
+
+func (h *userHandler) FindCode(ctx context.Context, in *FindCodeRequest, out *FindCodeResponse) error {
+	return h.UserHandler.FindCode(ctx, in, out)
 }
 
 func (h *userHandler) FindLikeMobileList(ctx context.Context, in *FindLikeMobileRequest, out *List) error {
