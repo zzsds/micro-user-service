@@ -17,6 +17,7 @@ service User {
 	rpc FindCode(FindCodeRequest) returns (FindCodeResponse) {}
 	rpc FindLikeMobileList(FindLikeMobileRequest) returns (List) {}
 	rpc FindInMobileList(FindInMobileRequest) returns (List) {}
+	rpc FindID(FindIdRequest) returns (FindIdResponse) {}
 	rpc FindInIDList(FindInIdRequest) returns (List) {}
 	rpc FindSourceList(FindSourceRequest) returns (List) {}
 	rpc SourceTypeList(SourceTypeRequest) returns (SourceTypeResponse) {}
@@ -186,6 +187,14 @@ message FindCodeRequest {
 }
 
 message FindCodeResponse {
+	Resource data = 1;
+}
+
+message FindIdRequest {
+	int32 id = 1;
+}
+
+message FindIdResponse {
 	Resource data = 1;
 }
 

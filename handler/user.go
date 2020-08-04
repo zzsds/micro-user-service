@@ -34,6 +34,7 @@ type UserHandler interface {
 	FindSourceList(context.Context, *user.FindSourceRequest, *user.List) error
 	SourceTypeList(context.Context, *user.SourceTypeRequest, *user.SourceTypeResponse) error
 	SearchPage(context.Context, *user.SearchPageRequest, *user.List) error
+	FindID(context.Context, *user.FindIdRequest, *user.FindIdResponse) error
 }
 
 const (
@@ -161,6 +162,10 @@ func (h *User) MobileRegister(ctx context.Context, req *user.MobileRegisterReque
 		return errors.BadRequest(h.String("MobileRegister"), err.Error())
 	}
 
+	if err := h.validate.FirstError(h.validate.NameVar("Name", req.GetName(), "required")); err != nil {
+		return errors.BadRequest(h.String("MobileRegister"), err.Error())
+	}
+
 	model := models.User{
 		Mobile:   req.GetMobile(),
 		Password: req.GetPassword(),
@@ -280,6 +285,20 @@ func (h *User) FindCode(ctx context.Context, req *user.FindCodeRequest, rsp *use
 		return errors.BadRequest(h.String("GetCode"), "%s code 格式错误", req.GetCode())
 	}
 	model := h.service.FindCode(req.GetCode())
+	if model == nil {
+		return nil
+	}
+
+	rsp.Data = h.service.ModelToResource(model)
+	return nil
+}
+
+// FindID ...
+func (h *User) FindID(ctx context.Context, req *user.FindIdRequest, rsp *user.FindIdResponse) error {
+	if err := h.validate.FirstError(h.validate.NameVar("ID", req.GetId(), "required,gte=0")); err != nil {
+		return errors.BadRequest(h.String("FindID"), err.Error())
+	}
+	model := h.service.FindID(uint(req.GetId()))
 	if model == nil {
 		return nil
 	}

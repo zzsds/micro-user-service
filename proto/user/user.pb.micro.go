@@ -47,6 +47,7 @@ type UserService interface {
 	FindCode(ctx context.Context, in *FindCodeRequest, opts ...client.CallOption) (*FindCodeResponse, error)
 	FindLikeMobileList(ctx context.Context, in *FindLikeMobileRequest, opts ...client.CallOption) (*List, error)
 	FindInMobileList(ctx context.Context, in *FindInMobileRequest, opts ...client.CallOption) (*List, error)
+	FindID(ctx context.Context, in *FindIdRequest, opts ...client.CallOption) (*FindIdResponse, error)
 	FindInIDList(ctx context.Context, in *FindInIdRequest, opts ...client.CallOption) (*List, error)
 	FindSourceList(ctx context.Context, in *FindSourceRequest, opts ...client.CallOption) (*List, error)
 	SourceTypeList(ctx context.Context, in *SourceTypeRequest, opts ...client.CallOption) (*SourceTypeResponse, error)
@@ -185,6 +186,16 @@ func (c *userService) FindInMobileList(ctx context.Context, in *FindInMobileRequ
 	return out, nil
 }
 
+func (c *userService) FindID(ctx context.Context, in *FindIdRequest, opts ...client.CallOption) (*FindIdResponse, error) {
+	req := c.c.NewRequest(c.name, "User.FindID", in)
+	out := new(FindIdResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userService) FindInIDList(ctx context.Context, in *FindInIdRequest, opts ...client.CallOption) (*List, error) {
 	req := c.c.NewRequest(c.name, "User.FindInIDList", in)
 	out := new(List)
@@ -240,6 +251,7 @@ type UserHandler interface {
 	FindCode(context.Context, *FindCodeRequest, *FindCodeResponse) error
 	FindLikeMobileList(context.Context, *FindLikeMobileRequest, *List) error
 	FindInMobileList(context.Context, *FindInMobileRequest, *List) error
+	FindID(context.Context, *FindIdRequest, *FindIdResponse) error
 	FindInIDList(context.Context, *FindInIdRequest, *List) error
 	FindSourceList(context.Context, *FindSourceRequest, *List) error
 	SourceTypeList(context.Context, *SourceTypeRequest, *SourceTypeResponse) error
@@ -260,6 +272,7 @@ func RegisterUserHandler(s server.Server, hdlr UserHandler, opts ...server.Handl
 		FindCode(ctx context.Context, in *FindCodeRequest, out *FindCodeResponse) error
 		FindLikeMobileList(ctx context.Context, in *FindLikeMobileRequest, out *List) error
 		FindInMobileList(ctx context.Context, in *FindInMobileRequest, out *List) error
+		FindID(ctx context.Context, in *FindIdRequest, out *FindIdResponse) error
 		FindInIDList(ctx context.Context, in *FindInIdRequest, out *List) error
 		FindSourceList(ctx context.Context, in *FindSourceRequest, out *List) error
 		SourceTypeList(ctx context.Context, in *SourceTypeRequest, out *SourceTypeResponse) error
@@ -322,6 +335,10 @@ func (h *userHandler) FindLikeMobileList(ctx context.Context, in *FindLikeMobile
 
 func (h *userHandler) FindInMobileList(ctx context.Context, in *FindInMobileRequest, out *List) error {
 	return h.UserHandler.FindInMobileList(ctx, in, out)
+}
+
+func (h *userHandler) FindID(ctx context.Context, in *FindIdRequest, out *FindIdResponse) error {
+	return h.UserHandler.FindID(ctx, in, out)
 }
 
 func (h *userHandler) FindInIDList(ctx context.Context, in *FindInIdRequest, out *List) error {
