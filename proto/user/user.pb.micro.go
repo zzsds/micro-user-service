@@ -42,6 +42,7 @@ type UserService interface {
 	ModifyPassword(ctx context.Context, in *ModifyPassRequest, opts ...client.CallOption) (*ModifyPassResponse, error)
 	ResetPassword(ctx context.Context, in *ResetPassRequest, opts ...client.CallOption) (*ResetPassResponse, error)
 	ModifyMobile(ctx context.Context, in *ModifyMobileRequest, opts ...client.CallOption) (*ModifyMobileResponse, error)
+	ModifyName(ctx context.Context, in *ModifyNameRequest, opts ...client.CallOption) (*ModifyNameResponse, error)
 	PassLogin(ctx context.Context, in *PassLoginRequest, opts ...client.CallOption) (*PassLoginResponse, error)
 	FindMobile(ctx context.Context, in *FindMobileRequest, opts ...client.CallOption) (*FindMobileResponse, error)
 	FindCode(ctx context.Context, in *FindCodeRequest, opts ...client.CallOption) (*FindCodeResponse, error)
@@ -129,6 +130,16 @@ func (c *userService) ResetPassword(ctx context.Context, in *ResetPassRequest, o
 func (c *userService) ModifyMobile(ctx context.Context, in *ModifyMobileRequest, opts ...client.CallOption) (*ModifyMobileResponse, error) {
 	req := c.c.NewRequest(c.name, "User.ModifyMobile", in)
 	out := new(ModifyMobileResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) ModifyName(ctx context.Context, in *ModifyNameRequest, opts ...client.CallOption) (*ModifyNameResponse, error) {
+	req := c.c.NewRequest(c.name, "User.ModifyName", in)
+	out := new(ModifyNameResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -246,6 +257,7 @@ type UserHandler interface {
 	ModifyPassword(context.Context, *ModifyPassRequest, *ModifyPassResponse) error
 	ResetPassword(context.Context, *ResetPassRequest, *ResetPassResponse) error
 	ModifyMobile(context.Context, *ModifyMobileRequest, *ModifyMobileResponse) error
+	ModifyName(context.Context, *ModifyNameRequest, *ModifyNameResponse) error
 	PassLogin(context.Context, *PassLoginRequest, *PassLoginResponse) error
 	FindMobile(context.Context, *FindMobileRequest, *FindMobileResponse) error
 	FindCode(context.Context, *FindCodeRequest, *FindCodeResponse) error
@@ -267,6 +279,7 @@ func RegisterUserHandler(s server.Server, hdlr UserHandler, opts ...server.Handl
 		ModifyPassword(ctx context.Context, in *ModifyPassRequest, out *ModifyPassResponse) error
 		ResetPassword(ctx context.Context, in *ResetPassRequest, out *ResetPassResponse) error
 		ModifyMobile(ctx context.Context, in *ModifyMobileRequest, out *ModifyMobileResponse) error
+		ModifyName(ctx context.Context, in *ModifyNameRequest, out *ModifyNameResponse) error
 		PassLogin(ctx context.Context, in *PassLoginRequest, out *PassLoginResponse) error
 		FindMobile(ctx context.Context, in *FindMobileRequest, out *FindMobileResponse) error
 		FindCode(ctx context.Context, in *FindCodeRequest, out *FindCodeResponse) error
@@ -315,6 +328,10 @@ func (h *userHandler) ResetPassword(ctx context.Context, in *ResetPassRequest, o
 
 func (h *userHandler) ModifyMobile(ctx context.Context, in *ModifyMobileRequest, out *ModifyMobileResponse) error {
 	return h.UserHandler.ModifyMobile(ctx, in, out)
+}
+
+func (h *userHandler) ModifyName(ctx context.Context, in *ModifyNameRequest, out *ModifyNameResponse) error {
+	return h.UserHandler.ModifyName(ctx, in, out)
 }
 
 func (h *userHandler) PassLogin(ctx context.Context, in *PassLoginRequest, out *PassLoginResponse) error {

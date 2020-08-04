@@ -35,6 +35,7 @@ type UserHandler interface {
 	SourceTypeList(context.Context, *user.SourceTypeRequest, *user.SourceTypeResponse) error
 	SearchPage(context.Context, *user.SearchPageRequest, *user.List) error
 	FindID(context.Context, *user.FindIdRequest, *user.FindIdResponse) error
+	ModifyName(context.Context, *user.ModifyNameRequest, *user.ModifyNameResponse) error
 }
 
 const (
@@ -239,6 +240,21 @@ func (h *User) ModifyMobile(ctx context.Context, req *user.ModifyMobileRequest, 
 	}
 	if err := h.service.ModifyMobile(uint(req.GetId()), req.GetMobile(), req.GetOldMobile()); err != nil {
 		return errors.BadRequest(h.String("ModifyMobile"), "修改失败：%v", err)
+	}
+	rsp.Success = true
+	return nil
+}
+
+// ModifyName ...
+func (h *User) ModifyName(ctx context.Context, req *user.ModifyNameRequest, rsp *user.ModifyNameResponse) error {
+	if err := h.validate.FirstError(h.validate.NameVar("ID", req.GetId(), "required,gte=0")); err != nil {
+		return errors.BadRequest(h.String("ModifyName"), err.Error())
+	}
+	if err := h.validate.FirstError(h.validate.NameVar("Name", req.GetName(), "required")); err != nil {
+		return errors.BadRequest(h.String("ModifyName"), err.Error())
+	}
+	if err := h.service.ModifyName(uint(req.GetId()), req.GetName()); err != nil {
+		return errors.BadRequest(h.String("ModifyName"), "修改失败：%v", err)
 	}
 	rsp.Success = true
 	return nil

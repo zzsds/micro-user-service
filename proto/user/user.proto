@@ -12,6 +12,7 @@ service User {
 	rpc ModifyPassword(ModifyPassRequest) returns (ModifyPassResponse) {}
 	rpc ResetPassword(ResetPassRequest) returns (ResetPassResponse) {}
 	rpc ModifyMobile(ModifyMobileRequest) returns (ModifyMobileResponse) {}
+	rpc ModifyName(ModifyNameRequest) returns (ModifyNameResponse) {}
 	rpc PassLogin(PassLoginRequest) returns (PassLoginResponse) {}
 	rpc FindMobile(FindMobileRequest) returns (FindMobileResponse) {}
 	rpc FindCode(FindCodeRequest) returns (FindCodeResponse) {}
@@ -116,6 +117,15 @@ message ModifyMobileRequest {
 }
 
 message ModifyMobileResponse {
+	bool success = 1;
+}
+
+message ModifyNameRequest {
+	int32 id = 1;
+	string name = 2;
+}
+
+message ModifyNameResponse {
 	bool success = 1;
 }
 

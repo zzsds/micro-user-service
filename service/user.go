@@ -29,6 +29,7 @@ type UserInterface interface {
 	FindInID(id ...uint) []*models.User
 	FindSource(source string) []*models.User
 	SourceType() []string
+	ModifyName(id uint, name string) error
 }
 
 // User ...
@@ -254,6 +255,34 @@ func (s *User) ModifyMobile(id uint, mobile, oldMobile string) error {
 	}
 
 	model.Mobile = mobile
+	if err := tx.Save(&model).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
+// ModifyName 修改名称
+func (s *User) ModifyName(id uint, name string) error {
+	tx := s.Db().Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return err
+	}
+
+	model := s.FindID(id)
+	if model == nil {
+		return fmt.Errorf("User Query Failed")
+	}
+
+	model.Name = name
 	if err := tx.Save(&model).Error; err != nil {
 		tx.Rollback()
 		return err
