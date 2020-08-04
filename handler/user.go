@@ -142,8 +142,8 @@ func (h *User) MobileRegister(ctx context.Context, req *user.MobileRegisterReque
 	if !models.ValidateMobile(req.GetMobile()) {
 		return errors.BadRequest(h.String("MobileRegister"), "手机号格式错误")
 	}
-
-	if h.service.FindMobile(req.GetMobile()).ID > 0 {
+	exist := h.service.FindMobile(req.GetMobile())
+	if exist != nil {
 		return errors.BadRequest(h.String("MobileRegister"), "%s 手机号已存在", req.GetMobile())
 	}
 

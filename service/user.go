@@ -113,21 +113,27 @@ func (s *User) PageDate(page, size int32, condition, order []string) (list []*mo
 // FindMobile ...
 func (s *User) FindMobile(mobile string) *models.User {
 	model := models.User{}
-	s.Db().Where("mobile = ?", mobile).First(&model)
+	if s.Db().Where("mobile = ?", mobile).First(&model).RecordNotFound() {
+		return nil
+	}
 	return &model
 }
 
 // FindCode ...
 func (s *User) FindCode(code string) *models.User {
 	model := models.User{}
-	s.Db().Where("code = ?", code).First(&model)
+	if s.Db().Where("code = ?", code).First(&model).RecordNotFound() {
+		return nil
+	}
 	return &model
 }
 
 // FindEmail ...
 func (s *User) FindEmail(email string) *models.User {
 	model := models.User{}
-	s.Db().Where("email = ?", email).First(&model)
+	if s.Db().Where("email = ?", email).First(&model).RecordNotFound() {
+		return nil
+	}
 	return &model
 }
 
