@@ -311,7 +311,7 @@ func (h *User) FindCode(ctx context.Context, req *user.FindCodeRequest, rsp *use
 
 // FindID ...
 func (h *User) FindID(ctx context.Context, req *user.FindIdRequest, rsp *user.FindIdResponse) error {
-	if err := h.validate.FirstError(h.validate.NameVar("ID", req.GetId(), "required,gte=0")); err != nil {
+	if err := h.validate.FirstError(h.validate.NameVar("ID", req.GetId(), "required,gte=1")); err != nil {
 		return errors.BadRequest(h.String("FindID"), err.Error())
 	}
 	model := h.service.FindID(uint(req.GetId()))
