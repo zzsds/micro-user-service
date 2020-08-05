@@ -112,7 +112,7 @@ func (h *User) Index(ctx context.Context, req *user.Pagination, rsp *user.List) 
 
 // Show ...
 func (h *User) Show(ctx context.Context, req *user.ShowRequest, rsp *user.ShowResponse) error {
-	if err := h.validate.FirstError(h.validate.NameVar("ID", req.GetId(), "required,gte=0")); err != nil {
+	if err := h.validate.NameVar("ID", req.GetId(), "required,gte=0"); err != nil {
 		return errors.BadRequest(h.String("Show"), err.Error())
 	}
 	model := h.service.FindID(uint(req.GetId()))
@@ -147,11 +147,11 @@ func (h *User) MobileRegister(ctx context.Context, req *user.MobileRegisterReque
 		return errors.BadRequest(h.String("MobileRegister"), "%s 手机号已存在", req.GetMobile())
 	}
 
-	if err := h.validate.FirstError(h.validate.NameVar("Password", req.GetPassword(), fmt.Sprintf("required,gte=%d", passLen))); err != nil {
+	if err := h.validate.NameVar("Password", req.GetPassword(), fmt.Sprintf("required,gte=%d", passLen)); err != nil {
 		return errors.BadRequest(h.String("MobileRegister"), err.Error())
 	}
 
-	if err := h.validate.FirstError(h.validate.NameVar("Source", req.GetSource(), "required")); err != nil {
+	if err := h.validate.NameVar("Source", req.GetSource(), "required"); err != nil {
 		return errors.BadRequest(h.String("MobileRegister"), err.Error())
 	}
 
@@ -159,11 +159,11 @@ func (h *User) MobileRegister(ctx context.Context, req *user.MobileRegisterReque
 		req.Name = req.GetMobile()
 	}
 
-	if err := h.validate.FirstError(h.validate.NameVar("Name", req.GetName(), "required")); err != nil {
+	if err := h.validate.NameVar("Name", req.GetName(), "required"); err != nil {
 		return errors.BadRequest(h.String("MobileRegister"), err.Error())
 	}
 
-	if err := h.validate.FirstError(h.validate.NameVar("Name", req.GetName(), "required")); err != nil {
+	if err := h.validate.NameVar("Name", req.GetName(), "required"); err != nil {
 		return errors.BadRequest(h.String("MobileRegister"), err.Error())
 	}
 
@@ -185,7 +185,7 @@ func (h *User) MobileRegister(ctx context.Context, req *user.MobileRegisterReque
 // ModifyPassword ...
 func (h *User) ModifyPassword(ctx context.Context, req *user.ModifyPassRequest, rsp *user.ModifyPassResponse) error {
 
-	if err := h.validate.FirstError(h.validate.NameVar("ID", req.GetId(), "required,gte=0")); err != nil {
+	if err := h.validate.NameVar("ID", req.GetId(), "required,gte=0"); err != nil {
 		return errors.BadRequest(h.String("ModifyPassword"), err.Error())
 	}
 
@@ -193,11 +193,11 @@ func (h *User) ModifyPassword(ctx context.Context, req *user.ModifyPassRequest, 
 		return errors.BadRequest(h.String("ModifyPassword"), "新密码和旧密码一致")
 	}
 
-	if err := h.validate.FirstError(h.validate.NameVar("OldPassword", req.GetOldPassword(), fmt.Sprintf("required,gte=%d", passLen))); err != nil {
+	if err := h.validate.NameVar("OldPassword", req.GetOldPassword(), fmt.Sprintf("required,gte=%d", passLen)); err != nil {
 		return errors.BadRequest(h.String("ModifyPassword"), err.Error())
 	}
 
-	if err := h.validate.FirstError(h.validate.NameVar("Password", req.GetPassword(), fmt.Sprintf("required,gte=%d", passLen))); err != nil {
+	if err := h.validate.NameVar("Password", req.GetPassword(), fmt.Sprintf("required,gte=%d", passLen)); err != nil {
 		return errors.BadRequest(h.String("ModifyPassword"), err.Error())
 	}
 
@@ -211,11 +211,11 @@ func (h *User) ModifyPassword(ctx context.Context, req *user.ModifyPassRequest, 
 
 // ResetPassword ...
 func (h *User) ResetPassword(ctx context.Context, req *user.ResetPassRequest, rsp *user.ResetPassResponse) error {
-	if err := h.validate.FirstError(h.validate.NameVar("ID", req.GetId(), "required,gte=0")); err != nil {
+	if err := h.validate.NameVar("ID", req.GetId(), "required,gte=0"); err != nil {
 		return errors.BadRequest(h.String("ResetPassword"), err.Error())
 	}
 
-	if err := h.validate.FirstError(h.validate.NameVar("Password", req.GetPassword(), fmt.Sprintf("required,gte=%d", passLen))); err != nil {
+	if err := h.validate.NameVar("Password", req.GetPassword(), fmt.Sprintf("required,gte=%d", passLen)); err != nil {
 		return errors.BadRequest(h.String("ResetPassword"), err.Error())
 	}
 
@@ -229,7 +229,7 @@ func (h *User) ResetPassword(ctx context.Context, req *user.ResetPassRequest, rs
 
 // ModifyMobile ...
 func (h *User) ModifyMobile(ctx context.Context, req *user.ModifyMobileRequest, rsp *user.ModifyMobileResponse) error {
-	if err := h.validate.FirstError(h.validate.NameVar("ID", req.GetId(), "required,gte=0")); err != nil {
+	if err := h.validate.NameVar("ID", req.GetId(), "required,gte=0"); err != nil {
 		return errors.BadRequest(h.String("ModifyMobile"), err.Error())
 	}
 	if !models.ValidateMobile(req.GetMobile()) {
@@ -247,10 +247,10 @@ func (h *User) ModifyMobile(ctx context.Context, req *user.ModifyMobileRequest, 
 
 // ModifyName ...
 func (h *User) ModifyName(ctx context.Context, req *user.ModifyNameRequest, rsp *user.ModifyNameResponse) error {
-	if err := h.validate.FirstError(h.validate.NameVar("ID", req.GetId(), "required,gte=0")); err != nil {
+	if err := h.validate.NameVar("ID", req.GetId(), "required,gte=0"); err != nil {
 		return errors.BadRequest(h.String("ModifyName"), err.Error())
 	}
-	if err := h.validate.FirstError(h.validate.NameVar("Name", req.GetName(), "required")); err != nil {
+	if err := h.validate.NameVar("Name", req.GetName(), "required"); err != nil {
 		return errors.BadRequest(h.String("ModifyName"), err.Error())
 	}
 	if err := h.service.ModifyName(uint(req.GetId()), req.GetName()); err != nil {
@@ -262,11 +262,11 @@ func (h *User) ModifyName(ctx context.Context, req *user.ModifyNameRequest, rsp 
 
 // PassLogin ...
 func (h *User) PassLogin(ctx context.Context, req *user.PassLoginRequest, rsp *user.PassLoginResponse) error {
-	if err := h.validate.FirstError(h.validate.NameVar("User", req.GetUser(), "required")); err != nil {
+	if err := h.validate.NameVar("User", req.GetUser(), "required"); err != nil {
 		return errors.BadRequest(h.String("PassLogin"), err.Error())
 	}
 
-	if err := h.validate.FirstError(h.validate.NameVar("Password", req.GetPassword(), fmt.Sprintf("required,gte=%d", passLen))); err != nil {
+	if err := h.validate.NameVar("Password", req.GetPassword(), fmt.Sprintf("required,gte=%d", passLen)); err != nil {
 		return errors.BadRequest(h.String("PassLogin"), err.Error())
 	}
 
@@ -311,7 +311,7 @@ func (h *User) FindCode(ctx context.Context, req *user.FindCodeRequest, rsp *use
 
 // FindID ...
 func (h *User) FindID(ctx context.Context, req *user.FindIdRequest, rsp *user.FindIdResponse) error {
-	if err := h.validate.FirstError(h.validate.NameVar("ID", req.GetId(), "required,gte=1")); err != nil {
+	if err := h.validate.NameVar("ID", req.GetId(), "required,gte=1"); err != nil {
 		return errors.BadRequest(h.String("FindID"), err.Error())
 	}
 	model := h.service.FindID(uint(req.GetId()))
@@ -325,7 +325,7 @@ func (h *User) FindID(ctx context.Context, req *user.FindIdRequest, rsp *user.Fi
 
 // FindLikeMobileList 模糊查询手机号
 func (h *User) FindLikeMobileList(ctx context.Context, req *user.FindLikeMobileRequest, rsp *user.List) error {
-	if err := h.validate.FirstError(h.validate.NameVar("Mobile", req.GetMobile(), "required,alphanum")); err != nil {
+	if err := h.validate.NameVar("Mobile", req.GetMobile(), "required,alphanum"); err != nil {
 		return errors.BadRequest(h.String("FindLikeMobileList"), err.Error())
 	}
 	list := h.service.FindLikeMobile(req.GetMobile())
@@ -338,7 +338,7 @@ func (h *User) FindLikeMobileList(ctx context.Context, req *user.FindLikeMobileR
 
 // FindInMobileList ...
 func (h *User) FindInMobileList(ctx context.Context, req *user.FindInMobileRequest, rsp *user.List) error {
-	if err := h.validate.FirstError(h.validate.NameVar("Mobile", req.GetMobile(), "required,dive,required,alphanum")); err != nil {
+	if err := h.validate.NameVar("Mobile", req.GetMobile(), "required,dive,required,alphanum"); err != nil {
 		return errors.BadRequest(h.String("FindInMobileList"), err.Error())
 	}
 
@@ -362,7 +362,7 @@ func (h *User) FindInMobileList(ctx context.Context, req *user.FindInMobileReque
 
 // FindInIDList ...
 func (h *User) FindInIDList(ctx context.Context, req *user.FindInIdRequest, rsp *user.List) error {
-	if err := h.validate.FirstError(h.validate.NameVar("Id", req.GetId(), "required,dive,required")); err != nil {
+	if err := h.validate.NameVar("Id", req.GetId(), "required,dive,required"); err != nil {
 		return errors.BadRequest(h.String("FindInIDList"), err.Error())
 	}
 
@@ -385,7 +385,7 @@ func (h *User) FindInIDList(ctx context.Context, req *user.FindInIdRequest, rsp 
 
 // FindSourceList ...
 func (h *User) FindSourceList(ctx context.Context, req *user.FindSourceRequest, rsp *user.List) error {
-	if err := h.validate.FirstError(h.validate.NameVar("Source", req.GetSource(), "required")); err != nil {
+	if err := h.validate.NameVar("Source", req.GetSource(), "required"); err != nil {
 		return errors.BadRequest(h.String("FindSourceList"), err.Error())
 	}
 
