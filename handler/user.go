@@ -272,7 +272,7 @@ func (h *User) PassLogin(ctx context.Context, req *user.PassLoginRequest, rsp *u
 
 	user, err := h.service.PassLogin(req.GetUser(), req.GetPassword())
 	if err != nil {
-		return errors.BadRequest(h.String("PassLogin"), "登录失败：%v", err)
+		return errors.BadRequest(h.String("PassLogin"), "登录失败：账号或密码错误", err)
 	}
 
 	rsp.Id = int32(user.ID)
