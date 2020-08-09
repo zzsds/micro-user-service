@@ -164,10 +164,6 @@ func (h *User) MobileRegister(ctx context.Context, req *user.MobileRegisterReque
 		return errors.BadRequest(h.String("MobileRegister"), err.Error())
 	}
 
-	if err := h.validate.NameVar("Name", req.GetName(), "required"); err != nil {
-		return errors.BadRequest(h.String("MobileRegister"), err.Error())
-	}
-
 	model := models.User{
 		Mobile:   req.GetMobile(),
 		Password: req.GetPassword(),
