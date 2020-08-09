@@ -33,11 +33,12 @@ type User struct {
 
 // BeforeCreate ...
 func (u *User) BeforeCreate(scope *gorm.Scope) error {
-	randCode := GenerateCode(6)
+	var randCode string
 	if u.Code != "" {
 		randCode = u.Code
+	} else {
+		randCode = GenerateCode(6)
 	}
-	scope.SetColumn("code", randCode)
 	salt := EncodeMD5(randCode)
 	scope.SetColumn("salt", salt)
 	if u.Password != "" {

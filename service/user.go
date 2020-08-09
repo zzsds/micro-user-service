@@ -139,6 +139,14 @@ func (s *User) FindEmail(email string) *models.User {
 
 // Create ...
 func (s *User) Create(model *models.User) error {
+	if model.Code == "" {
+		model.Code = models.GenerateCode(6)
+	}
+
+	if s.FindCode(model.Code) != nil {
+		return s.Create(model)
+	}
+
 	tx := s.Db().Begin()
 
 	defer func() {
