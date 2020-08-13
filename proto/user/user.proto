@@ -23,6 +23,7 @@ service User {
 	rpc FindSourceList(FindSourceRequest) returns (List) {}
 	rpc SourceTypeList(SourceTypeRequest) returns (SourceTypeResponse) {}
 	rpc SearchPage(SearchPageRequest) returns (List) {}
+	rpc BatchMobileRegister(BatchMobileRegisterRequest) returns (BatchMobileRegisterResponse) {}
 }
 
 message SearchPageRequest {
@@ -206,6 +207,21 @@ message FindIdRequest {
 
 message FindIdResponse {
 	Resource data = 1;
+}
+
+message BatchMobileRegisterRequest {
+	repeated MobileRegisterRequest data = 1;
+	string source = 2;
+}
+
+message BatchMobileRegisterResponse {
+	repeated Resource data = 1;
+	enum State {
+		Fail = 0;
+		Success = 1;
+		PartialSuccess = 2;
+	}
+	State state = 2;
 }
 
 message Message {

@@ -30,6 +30,7 @@ type UserInterface interface {
 	FindSource(source string) []*models.User
 	SourceType() []string
 	ModifyName(id uint, name string) error
+	BatchCreate([]*models.User) error
 }
 
 // User ...
@@ -379,4 +380,47 @@ func (s *User) SourceType() []string {
 		return nil
 	}
 	return list
+}
+
+// BatchCreate ...
+func (s *User) BatchCreate(users []*models.User) error {
+	codes := make([]string, len(users))
+	for k, model := range users {
+		if model.Code == "" {
+			model.Code = models.GenerateCode(6)
+		}
+		salt := models.EncodeMD5(model.Code)
+		if model.Password != "" {
+			pass, _ := models.EncodeSalt(model.Password, salt)
+			model.Password = pass
+		}
+		codes[k] = model.Code
+	}
+
+	codeUsers := make([]*models.User, 0)
+	if !s.db.Where("code IN (?)", codes).Find(&codeUsers).RecordNotFound() {
+
+	}
+	// if s.FindInCode(model.Code) != nil {
+	// 	return s.Create(model)
+	// }
+
+	tx := s.Db().Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return err
+	}
+
+	// if err := tx.Create(model).Error; err != nil {
+	// 	tx.Rollback()
+	// 	return err
+	// }
+
+	return tx.Commit().Error
 }

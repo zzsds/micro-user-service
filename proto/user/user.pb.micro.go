@@ -53,6 +53,7 @@ type UserService interface {
 	FindSourceList(ctx context.Context, in *FindSourceRequest, opts ...client.CallOption) (*List, error)
 	SourceTypeList(ctx context.Context, in *SourceTypeRequest, opts ...client.CallOption) (*SourceTypeResponse, error)
 	SearchPage(ctx context.Context, in *SearchPageRequest, opts ...client.CallOption) (*List, error)
+	BatchMobileRegister(ctx context.Context, in *BatchMobileRegisterRequest, opts ...client.CallOption) (*BatchMobileRegisterResponse, error)
 }
 
 type userService struct {
@@ -247,6 +248,16 @@ func (c *userService) SearchPage(ctx context.Context, in *SearchPageRequest, opt
 	return out, nil
 }
 
+func (c *userService) BatchMobileRegister(ctx context.Context, in *BatchMobileRegisterRequest, opts ...client.CallOption) (*BatchMobileRegisterResponse, error) {
+	req := c.c.NewRequest(c.name, "User.BatchMobileRegister", in)
+	out := new(BatchMobileRegisterResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for User service
 
 type UserHandler interface {
@@ -268,6 +279,7 @@ type UserHandler interface {
 	FindSourceList(context.Context, *FindSourceRequest, *List) error
 	SourceTypeList(context.Context, *SourceTypeRequest, *SourceTypeResponse) error
 	SearchPage(context.Context, *SearchPageRequest, *List) error
+	BatchMobileRegister(context.Context, *BatchMobileRegisterRequest, *BatchMobileRegisterResponse) error
 }
 
 func RegisterUserHandler(s server.Server, hdlr UserHandler, opts ...server.HandlerOption) error {
@@ -290,6 +302,7 @@ func RegisterUserHandler(s server.Server, hdlr UserHandler, opts ...server.Handl
 		FindSourceList(ctx context.Context, in *FindSourceRequest, out *List) error
 		SourceTypeList(ctx context.Context, in *SourceTypeRequest, out *SourceTypeResponse) error
 		SearchPage(ctx context.Context, in *SearchPageRequest, out *List) error
+		BatchMobileRegister(ctx context.Context, in *BatchMobileRegisterRequest, out *BatchMobileRegisterResponse) error
 	}
 	type User struct {
 		user
@@ -372,4 +385,8 @@ func (h *userHandler) SourceTypeList(ctx context.Context, in *SourceTypeRequest,
 
 func (h *userHandler) SearchPage(ctx context.Context, in *SearchPageRequest, out *List) error {
 	return h.UserHandler.SearchPage(ctx, in, out)
+}
+
+func (h *userHandler) BatchMobileRegister(ctx context.Context, in *BatchMobileRegisterRequest, out *BatchMobileRegisterResponse) error {
+	return h.UserHandler.BatchMobileRegister(ctx, in, out)
 }

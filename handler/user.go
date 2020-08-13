@@ -36,6 +36,7 @@ type UserHandler interface {
 	SearchPage(context.Context, *user.SearchPageRequest, *user.List) error
 	FindID(context.Context, *user.FindIdRequest, *user.FindIdResponse) error
 	ModifyName(context.Context, *user.ModifyNameRequest, *user.ModifyNameResponse) error
+	BatchMobileRegister(context.Context, *user.BatchMobileRegisterRequest, *user.BatchMobileRegisterResponse) error
 }
 
 const (
@@ -397,5 +398,40 @@ func (h *User) FindSourceList(ctx context.Context, req *user.FindSourceRequest, 
 // SourceTypeList ...
 func (h *User) SourceTypeList(ctx context.Context, req *user.SourceTypeRequest, rsp *user.SourceTypeResponse) error {
 	rsp.Type = h.service.SourceType()
+	return nil
+}
+
+// BatchMobileRegister ...
+func (h *User) BatchMobileRegister(ctx context.Context, req *user.BatchMobileRegisterRequest, rsp *user.BatchMobileRegisterResponse) error {
+	if req.GetData() == nil {
+		return errors.BadRequest(h.String("BatchMobileRegister"), "数据不能为空")
+	}
+
+	uniqueMobiles, mobiles := make(map[string]string), make([]string, 0)
+	for _, v := range req.GetData() {
+		if !models.ValidateMobile(v.GetMobile()) {
+			return errors.BadRequest(h.String("BatchMobileRegister"), "%s 手机号格式错误", v.GetMobile())
+		}
+		if _, ok := uniqueMobiles[v.GetMobile()]; ok {
+			continue
+		}
+		uniqueMobiles[v.GetMobile()] = v.GetMobile()
+		mobiles = append(mobiles, v.GetMobile())
+	}
+	rsp.State = user.BatchMobileRegisterResponse_Success
+	list := h.service.FindInMobile(mobiles...)
+	for _, v := range list {
+		rsp.Data = append(rsp.GetData(), h.service.ModelToResource(v))
+		for i, d := range req.GetData() {
+			if v.Mobile == d.GetMobile() {
+				req.Data = append(req.Data[:i], req.Data[i+1:]...)
+			}
+		}
+	}
+
+	if req.GetData() == nil {
+		return nil
+	}
+
 	return nil
 }
