@@ -4,6 +4,7 @@ import (
 	"github.com/micro/go-micro/v2"
 	"github.com/micro/go-micro/v2/config/source/file"
 	log "github.com/micro/go-micro/v2/logger"
+	"github.com/micro/go-micro/v2/store/memory"
 	"github.com/zzsds/micro-user-service/conf"
 	"github.com/zzsds/micro-user-service/handler"
 	dao "github.com/zzsds/micro-user-service/service"
@@ -28,7 +29,7 @@ func main() {
 
 	// Initialise service
 	service.Init()
-	dao := dao.NewDao()
+	dao := dao.NewDao(dao.WithStore(memory.NewStore()))
 	defer dao.Close()
 
 	// Register Handler

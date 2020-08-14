@@ -7,26 +7,79 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/micro/go-micro/v2/store"
+	Sync "github.com/micro/go-micro/v2/sync"
+	"github.com/micro/go-micro/v2/sync/lock"
+	memoryLock "github.com/micro/go-micro/v2/sync/lock/memory"
 	"github.com/zzsds/micro-user-service/conf"
 	"github.com/zzsds/micro-user-service/models"
 )
 
-type Dao struct {
-	db   *gorm.DB
-	user *models.User
-}
+const (
+	ID     = "id"
+	CODE   = "code"
+	MOBILE = "mobile"
+)
 
 var (
 	instance *Dao
 	Once     sync.Once
+	MapData  = []string{ID, CODE, MOBILE}
 )
 
-func NewDao() *Dao {
+type Options struct {
+	Store store.Store
+	Lock  lock.Lock
+	Code  Sync.Map
+}
+
+type Option func(o *Options)
+
+func NewOption(opts ...Option) *Options {
+	var options = &Options{
+		Store: store.DefaultStore,
+		Lock:  memoryLock.NewLock(),
+	}
+	for _, o := range opts {
+		o(options)
+	}
+	mapping := Sync.NewMap(Sync.WithStore(options.Store), Sync.WithLock(options.Lock))
+	options.Code = mapping
+	return options
+}
+
+// WithStore sets the store implementation option
+func WithStore(s store.Store) Option {
+	return func(o *Options) {
+		o.Store = s
+	}
+}
+
+// WithLock sets the locking implementation option
+func WithLock(l lock.Lock) Option {
+	return func(o *Options) {
+		o.Lock = l
+	}
+}
+
+type Dao struct {
+	options *Options
+	mu      sync.Mutex
+	db      *gorm.DB
+	user    *models.User
+}
+
+// NewDao ...
+func NewDao(opts ...Option) *Dao {
 	Once.Do(func() {
-		instance = &Dao{}
+		instance = &Dao{
+			options: NewOption(opts...),
+		}
 	})
 	instance.connection()
 	instance.AutoMigrate()
+	// 初始化数据到map列表
+	instance.initCodeList()
 	return instance
 }
 
@@ -61,4 +114,18 @@ func (dao *Dao) AutoMigrate() {
 	if err := dao.Db().AutoMigrate(dao.user).Error; err != nil {
 		panic(fmt.Sprintf("sync create mysql table failed: %v", err))
 	}
+}
+
+func (dao *Dao) initCodeList(users ...*models.User) error {
+	if len(users) <= 0 {
+		if dao.Db().Model(dao.user).Select("id, code").Find(&users).RecordNotFound() {
+			return nil
+		}
+	}
+
+	opt := dao.options
+	for _, v := range users {
+		opt.Code.Write(v.Code, v.ID)
+	}
+	return nil
 }

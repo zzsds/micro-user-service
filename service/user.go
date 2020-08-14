@@ -1,9 +1,11 @@
 package service
 
 import (
+	"bytes"
 	"fmt"
 	"time"
 
+	"github.com/go-errors/errors"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/zzsds/micro-user-service/models"
@@ -144,8 +146,16 @@ func (s *User) Create(model *models.User) error {
 		model.Code = models.GenerateCode(6)
 	}
 
-	if s.FindCode(model.Code) != nil {
-		return s.Create(model)
+	opt := s.options
+	if opt != nil {
+		var i int
+		if err := opt.Code.Read(model.Code, &i); err != nil {
+			return s.Create(model)
+		}
+	} else {
+		if s.FindCode(model.Code) != nil {
+			return s.Create(model)
+		}
 	}
 
 	tx := s.Db().Begin()
@@ -163,6 +173,9 @@ func (s *User) Create(model *models.User) error {
 	if err := tx.Create(model).Error; err != nil {
 		tx.Rollback()
 		return err
+	}
+	if opt != nil {
+		opt.Code.Write(model.Code, model.ID)
 	}
 
 	return tx.Commit().Error
@@ -384,26 +397,29 @@ func (s *User) SourceType() []string {
 
 // BatchCreate ...
 func (s *User) BatchCreate(users []*models.User) error {
-	codes := make([]string, len(users))
-	for k, model := range users {
+	userLen := len(users)
+	if userLen <= 0 {
+		return errors.Errorf("user data not null")
+	}
+	now := time.Now()
+	for _, model := range users {
+		model.CreatedAt = now
+		model.UpdatedAt = now
+	CODE:
 		if model.Code == "" {
 			model.Code = models.GenerateCode(6)
 		}
-		salt := models.EncodeMD5(model.Code)
+		model.Salt = models.EncodeMD5(model.Code)
 		if model.Password != "" {
-			pass, _ := models.EncodeSalt(model.Password, salt)
+			pass, _ := models.EncodeSalt(model.Password, model.Salt)
 			model.Password = pass
 		}
-		codes[k] = model.Code
+		var i int
+		s.options.Code.Read(model.Code, &i)
+		if i > 0 {
+			goto CODE
+		}
 	}
-
-	codeUsers := make([]*models.User, 0)
-	if !s.db.Where("code IN (?)", codes).Find(&codeUsers).RecordNotFound() {
-
-	}
-	// if s.FindInCode(model.Code) != nil {
-	// 	return s.Create(model)
-	// }
 
 	tx := s.Db().Begin()
 
@@ -416,11 +432,28 @@ func (s *User) BatchCreate(users []*models.User) error {
 	if err := tx.Error; err != nil {
 		return err
 	}
+	var buff bytes.Buffer
+	buff.WriteString("INSERT INTO users (`created_at`, `updated_at`, `name`, `password`, `salt`, `mobile`, `email`, `nickname`, `realname`, `code`, `source`, `enabled`) VALUES ")
+	localFormat := "2006-01-02 15:04:05"
+	for k, v := range users {
+		buff.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d)", v.CreatedAt.Format(localFormat), v.UpdatedAt.Format(localFormat), v.Name, v.Password, v.Salt, v.Mobile, v.Email, v.Nickname, v.Realname, v.Code, v.Source, v.Enabled))
+		divide := ","
+		if k+1 == userLen {
+			divide = ";"
+		}
+		buff.WriteString(divide)
+	}
+	if err := tx.Exec(buff.String()).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	userList := make([]*models.User, 0)
+	if !tx.Order("id DESC").Limit(userLen).Find(&userList).RecordNotFound() {
+		copy(users, userList)
+	}
 
-	// if err := tx.Create(model).Error; err != nil {
-	// 	tx.Rollback()
-	// 	return err
-	// }
+	// 重新加载code列表
+	go s.initCodeList(users...)
 
 	return tx.Commit().Error
 }

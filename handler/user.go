@@ -407,6 +407,10 @@ func (h *User) BatchMobileRegister(ctx context.Context, req *user.BatchMobileReg
 		return errors.BadRequest(h.String("BatchMobileRegister"), "数据不能为空")
 	}
 
+	if err := h.validate.NameVar("Source", req.GetSource(), "required"); err != nil {
+		return err
+	}
+
 	uniqueMobiles, mobiles := make(map[string]string), make([]string, 0)
 	for _, v := range req.GetData() {
 		if !models.ValidateMobile(v.GetMobile()) {
@@ -418,17 +422,41 @@ func (h *User) BatchMobileRegister(ctx context.Context, req *user.BatchMobileReg
 		uniqueMobiles[v.GetMobile()] = v.GetMobile()
 		mobiles = append(mobiles, v.GetMobile())
 	}
-	rsp.State = user.BatchMobileRegisterResponse_Success
+	rsp.State = user.BatchMobileRegisterResponse_Fail
 	list := h.service.FindInMobile(mobiles...)
 	for _, v := range list {
 		rsp.Data = append(rsp.GetData(), h.service.ModelToResource(v))
 		for i, d := range req.GetData() {
 			if v.Mobile == d.GetMobile() {
+				rsp.State = user.BatchMobileRegisterResponse_PartialSuccess
 				req.Data = append(req.Data[:i], req.Data[i+1:]...)
 			}
 		}
 	}
 
+	if len(req.GetData()) <= 0 {
+		rsp.State = user.BatchMobileRegisterResponse_Success
+		return nil
+	}
+
+	datas := make([]*models.User, len(req.GetData()))
+	for k, v := range req.GetData() {
+		datas[k] = &models.User{
+			Mobile:   v.GetMobile(),
+			Password: v.GetPassword(),
+			Name:     v.GetName(),
+			Source:   v.GetSource(),
+		}
+	}
+
+	if err := h.service.BatchCreate(datas); err != nil {
+		return errors.BadRequest(h.String("BatchMobileRegister"), "批量注册失败")
+	}
+
+	for _, v := range datas {
+		rsp.Data = append(rsp.GetData(), h.service.ModelToResource(v))
+	}
+	rsp.State = user.BatchMobileRegisterResponse_Success
 	if req.GetData() == nil {
 		return nil
 	}
