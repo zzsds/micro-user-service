@@ -149,7 +149,7 @@ func (s *User) Create(model *models.User) error {
 	opt := s.options
 	if opt != nil {
 		var i int
-		if err := opt.Code.Read(model.Code, &i); err != nil {
+		if opt.Code.Read(model.Code, &i) == nil && i > 0 {
 			return s.Create(model)
 		}
 	} else {
@@ -415,8 +415,7 @@ func (s *User) BatchCreate(users []*models.User) error {
 			model.Password = pass
 		}
 		var i int
-		s.options.Code.Read(model.Code, &i)
-		if i > 0 {
+		if s.options.Code.Read(model.Code, &i) == nil || i > 0 {
 			goto CODE
 		}
 	}
